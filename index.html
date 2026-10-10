@@ -1794,11 +1794,16 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  // under-coop HC
  
  // metal roof: 4 sheets, x -3..133
- quad(g,[[-3,yr(-6),-6],[133,yr(-6),-6],[133,yr(102),102],[-3,yr(102),102]],mat.metal);
- {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-3;x<=133;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
+ quad(g,[[-22,yr(-6),-6],[148,yr(-6),-6],[148,yr(102),102],[-22,yr(102),102]],mat.metal); // 5 sheets x 34" = 170": x -22..148 (22" overhang past coop end wall)
+ // end overhang framing: top plates extended as outlookers, PT 2x4 fly rafter at x=-22, knee braces to end-wall corner posts
+ box(g,-22,0,top(0)-1.5,top(0),0,3.5,mat.pt);box(g,-22,0,top(96)-1.5,top(96),92.5,96,mat.pt);
+ {const r=box(g,-22,-20.5,0,3.5,-6,102,mat.pt);r.scale.z=Math.hypot(108,27)/108;r.position.set(-21.25*IN,(top(48)+1.75)*IN,48*IN);r.rotation.x=Math.atan2(24,96);}
+ for(const z of [48]){const r=box(g,-22,0,top(z)-1.5,top(z),z-0.75,z+0.75,mat.pt);}
+ for(const [z,t] of [[1.75,top(0)],[94.25,top(96)]]){const k=box(g,-12,12,-0.75,0.75,z-0.75,z+0.75,mat.pt);k.scale.x=Math.hypot(18,18)/24;k.position.set(-9*IN,(t-10.5)*IN,z*IN);k.rotation.z=-Math.PI/4;}
+ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-22;x<=148;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  for(const x of [31,65,99]){const sm=box(g,x,x+0.6,0,0.8,-6,102,M(0x6f777c));sm.position.y=(yr(48)+0.6)*IN;sm.scale.z=Math.hypot(108,27)/108;sm.rotation.x=Math.atan2(24,96);}
  // HC top + run walls
- meshPanel(g,[133,yr(0)-0.5,0],[59,0,0],[0,-24,96]);
+ meshPanel(g,[148,yr(0)-0.5,0],[44,0,0],[0,-24,96]);
  meshPanel(g,[72,5,-0.3],[120,0,0],[0,79,0]);meshPanel(g,[72,5,96.3],[120,0,0],[0,55,0]);meshPanel(g,[192.3,5,0],[0,0,96],[0,55,0]);
  // run door
  // run door: PT 2x4 frame + 1/2" HC + diagonal brace, 3 hinges + latch
@@ -1807,7 +1812,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  meshPanel(g,[154.5,6,-0.4],[25.5,0,0],[0,66,0],2);
  for(const y of [10,38,64])box(g,179,183,y,y+1.5,-2.3,-1.8,M(0x222222));box(g,151,155,40,43,-2.4,-1.8,mat.galv);
  // gutter on low (back) edge + HC guard
- const gy=yr(102)-2.5;box(g,-3,133,gy,gy+4,102,107,mat.galv);meshPanel(g,[-3,gy+4.1,102],[136,0,0],[0,0,5],1);
+ const gy=yr(102)-2.5;box(g,-22,148,gy,gy+4,102,107,mat.galv);meshPanel(g,[-22,gy+4.1,102],[170,0,0],[0,0,5],1);
  // first-flush diverter (vertical 3" pipe) + downspout to barrel
  cyl(1.75,gy-14,120,(gy+14)/2,104.5,M(0xe8e8e8));box(g,118,122,12,16,102.5,106.5,M(0xcfcfcf)); // diverter cap
  const tp=cyl(1,14,120,40,98,M(0xe8e8e8),Math.PI/2); // tee into barrel through back HC
@@ -1820,7 +1825,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  cyl(6,14,95,30,40,mat.galv);
  // solar
  const sp=new THREE.Mesh(new THREE.BoxGeometry(41.8*IN,1.4*IN,20.9*IN),mat.solar);sp.position.set(30*IN,(yr(16)+2.5)*IN,16*IN);sp.rotation.x=Math.atan2(24,96);sp.castShadow=true;g.add(sp);
- label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'4 of Terry\'s 3x12 sheets: coop + 5\'4" of run',62,yr(48)+18,48);label(g,'HC top 4\'11"',162,yr(48)+8,48,0.8);
+ label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48);label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
  label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed box (top lid)',-14,44,71,0.8);label(g,'pop door + step',80,30,48,0.75);
  label(g,'rain barrel + nipples',120,52,82,0.8);
  label(g,'3 nest boxes',-14,34,36,0.8);label(g,'4x4 tow beam + eye bolts',198,14,48,0.85);
@@ -1837,7 +1842,7 @@ const groups={A:buildA(),B:buildB(),C:buildC(),D:buildD(),E:buildE(),F:buildF(),
 let cur='A';function setOpt(o){cur=o;groups.A.visible=o==='A';groups.B.visible=o==='B';groups.C.visible=o==='C';groups.D.visible=o==='D';groups.E.visible=o==='E';groups.F.visible=o==='F';groups.G.visible=o==='G';
  document.getElementById('title').textContent=o==='G'?'Option G — 8x16, all-PT framing, T1-11 coop with 12" HC vent band, framed walk-in door':o==='F'?'Option F — 8x16, low solid-floor 6x8 walk-in coop, rain-catchment waterer, 4 of Terry\'s sheets':o==='E'?'Option E — 8x16, 6x8 coop, feed bin, rain-catchment waterer, 4 of Terry\'s sheets':o==='D'?'Option D (FINAL) — lightweight lumber tractor, 3:12 shed roof of Terry\'s 3 metal sheets':o==='A'?'Option A — 2x4 lumber run, 3:12 shed metal roof':o==='B'?'Option B — cattle-panel hoop run, framed coop end':'Option C — lightweight value hoop: 4x4 skids, ply coop, owned metal on coop + coop half of hoop';
  for(const b of document.querySelectorAll('.opt'))b.classList.toggle('on',b.dataset.o===o);}
-const VIEWS={1:[[22,9,-13],[5.5,2.8,4]],2:[[6,4,-24],[6,3,4]],3:[[-6,24,-12],[6,1.5,4]]};const VIEWS_E={under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[-5.6,4.2,8.6],[-0.6,2.4,6.0]],nest:[[-9.5,3.6,-1.5],[0,1.9,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+const VIEWS={1:[[22,9,-13],[5.5,2.8,4]],2:[[6,4,-24],[6,3,4]],3:[[-6,24,-12],[6,1.5,4]]};const VIEWS_E={under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[-5.6,4.2,8.6],[-0.6,2.4,6.0]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
 function setView(v){const [p,t]=(cur==='E'||cur==='F'||cur==='G'?VIEWS_E:VIEWS)[v];camera.position.set(...p);controls.target.set(...t);controls.update();}
 let showLabels=true;function toggleLabels(){showLabels=!showLabels;for(const g of [groups.A,groups.B,groups.C,groups.D,groups.E,groups.F,groups.G,plab])g.userData.labels.visible=showLabels;}
 window.setOpt=setOpt;window.setView=setView;window.toggleLabels=toggleLabels;
