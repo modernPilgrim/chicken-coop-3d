@@ -1508,7 +1508,7 @@ function buildA(){const g=newGroup();base(g);
  // metal roof
  const yr=(z)=>top(0,z)+3.8;quad(g,[[-3,yr(-6),-6],[99,yr(-6),-6],[99,yr(102),102],[-3,yr(102),102]],mat.metal);
  // ribs
- for(let z=-6;z<=102;z+=9){const rb=box(g,-3,99,0,0.6,z,z+0.8,mat.metal);rb.position.y=(yr(z)+0.3)*IN;}
+ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-3;x<=99;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  // hardware cloth top & walls
  meshPanel(g,[99,yr(0)-0.5,0],[45,0,0],[0,-24,96]);
  meshPanel(g,[48,7,-0.3],[96,0,0],[0,77,0]);meshPanel(g,[48,7,96.3],[96,0,0],[0,53,0]);meshPanel(g,[144.3,7,0],[0,0,96],[0,53,0]);
@@ -1539,7 +1539,7 @@ function buildD(){const g=newGroup();base(g,3.5);
  const yr=(z)=>top(0,z)+3.8;quad(g,[[-3,yr(-6),-6],[99,yr(-6),-6],[99,yr(102),102],[-3,yr(102),102]],mat.metal);
  for(const x of [31,65]){const sm=box(g,x,x+0.6,0,0.8,-6,102,M(0x7f878c));sm.position.y=(yr(48)+0.5)*IN;sm.scale.z=Math.hypot(108,27)/108;sm.rotation.x=Math.atan2(24,96);}
  // ribs
- for(let z=-6;z<=102;z+=9){const rb=box(g,-3,99,0,0.6,z,z+0.8,mat.metal);rb.position.y=(yr(z)+0.3)*IN;}
+ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-3;x<=99;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  // hardware cloth top & walls
  meshPanel(g,[99,yr(0)-0.5,0],[45,0,0],[0,-24,96]);
  meshPanel(g,[48,5,-0.3],[96,0,0],[0,79,0]);meshPanel(g,[48,5,96.3],[96,0,0],[0,55,0]);meshPanel(g,[144.3,5,0],[0,0,96],[0,55,0]);
@@ -1651,13 +1651,14 @@ function buildE(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  box(g,72.6,73.6,30,45,40,53,M(0x777777));const rp=box(g,72,114,0,1,42,54,mat.ramp);rp.position.set(93*IN,15*IN,48*IN);rp.rotation.z=-Math.atan2(29,40);
  for(let i=0;i<3;i++){const z0=24+i*16;box(g,-14,0,30,46,z0,z0+16,mat.nest);box(g,-14.5,-13.9,33,43,z0+3,z0+13,M(0x3a2a1a));}
  const lid=box(g,-16,1,46,47,22,74,mat.metal);lid.rotation.z=-0.12;
+ for(let z=23;z<=73;z+=6){const r=box(g,-16,1,0,0.5,z,z+0.6,mat.metal);r.position.set(-7.5*IN,47.3*IN,(z+0.3)*IN);r.rotation.z=-0.12;} // nest lid ribs down its slope
  // feed bin under coop (front side, gasketed front-hinged lid)
  box(g,8,42,5,23,1,23,M(0x3f6b3a));box(g,8,42,5,23,0.2,1,M(0x2f5230));box(g,10,40,20,21,-0.3,0.2,mat.galv);
  // under-coop HC
  meshPanel(g,[0,5,-0.3],[72,0,0],[0,21,0]);meshPanel(g,[0,5,96.3],[72,0,0],[0,21,0]);meshPanel(g,[-0.3,5,0],[0,0,96],[0,21,0]);
  // metal roof: 4 sheets, x -3..133
  quad(g,[[-3,yr(-6),-6],[133,yr(-6),-6],[133,yr(102),102],[-3,yr(102),102]],mat.metal);
- for(let z=-6;z<=102;z+=9){const rb=box(g,-3,133,0,0.6,z,z+0.8,mat.metal);rb.position.y=(yr(z)+0.3)*IN;}
+ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-3;x<=133;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  for(const x of [31,65,99]){const sm=box(g,x,x+0.6,0,0.8,-6,102,M(0x6f777c));sm.position.y=(yr(48)+0.6)*IN;sm.scale.z=Math.hypot(108,27)/108;sm.rotation.x=Math.atan2(24,96);}
  // HC top + run walls
  meshPanel(g,[133,yr(0)-0.5,0],[59,0,0],[0,-24,96]);
@@ -1714,7 +1715,7 @@ function buildF(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  
  // metal roof: 4 sheets, x -3..133
  quad(g,[[-3,yr(-6),-6],[133,yr(-6),-6],[133,yr(102),102],[-3,yr(102),102]],mat.metal);
- for(let z=-6;z<=102;z+=9){const rb=box(g,-3,133,0,0.6,z,z+0.8,mat.metal);rb.position.y=(yr(z)+0.3)*IN;}
+ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-3;x<=133;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  for(const x of [31,65,99]){const sm=box(g,x,x+0.6,0,0.8,-6,102,M(0x6f777c));sm.position.y=(yr(48)+0.6)*IN;sm.scale.z=Math.hypot(108,27)/108;sm.rotation.x=Math.atan2(24,96);}
  // HC top + run walls
  meshPanel(g,[133,yr(0)-0.5,0],[59,0,0],[0,-24,96]);
@@ -1773,6 +1774,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  box(g,72.6,73.6,10,25,40,53,M(0x777777));box(g,73.6,83,0,5,40,54,mat.ramp);
  for(let i=0;i<3;i++){const z0=24+i*16;box(g,-14,0,30,46,z0,z0+16,mat.nest);box(g,-14.5,-13.9,33,43,z0+3,z0+13,M(0x3a2a1a));}
  const lid=box(g,-16,1,46,47,22,74,mat.metal);lid.rotation.z=-0.12;
+ for(let z=23;z<=73;z+=6){const r=box(g,-16,1,0,0.5,z,z+0.6,mat.metal);r.position.set(-7.5*IN,47.3*IN,(z+0.3)*IN);r.rotation.z=-0.12;} // nest lid ribs down its slope
  // feed bin under coop (front side, gasketed front-hinged lid)
  // tilt-out feed cubby under nest boxes: interior 20.5" high x 20" deep, 2 bays, each bottom-hinged door + carrier holding upright Vittles Vault 25 lb (12x12x13.75)
  // cantilevered off end-wall framing: 3 PT 2x4 brackets (bottom chord, top chord, front post, knee brace) through-bolted to sistered end-wall studs; nothing touches ground
@@ -1782,7 +1784,13 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  box(g,-20,0,9,9.5,22,74,t2);box(g,-20,0,29.5,30,22,74,t2);
  for(const z of [21.4,73.4])box(g,-20,0,7.5,30,z,z+0.6,t2);
 
- const ct=box(g,-22,-14,30,30.5,21,75,mat.metal);
+ const ct=box(g,-22,-14,30,30.5,21,75,mat.metal);for(let z=22;z<=74;z+=6)box(g,-22,-14,30.5,30.9,z,z+0.6,mat.metal);
+ // PREDATOR CLOSURE: PT 2x4 cross sills at coop end (x=0) and coop/run line (x=68.5) close the 3.5" gap under the coop floor between skids;
+ // 1/2" HC stapled across underside of coop floor framing -> under-coop void fully enclosed, not connected to run.
+ box(g,0,3.5,0,3.5,3.5,92.5,mat.pt);box(g,68.5,72,0,3.5,3.5,92.5,mat.pt);meshPanel(g,[0,0.15,0],[72,0,0],[0,0,96],2);
+ // continuous 12" outward HC ground apron around entire 8x16 footprint incl. coop sides and cubby end
+ meshPanel(g,[-12,0.1,-12],[216,0,0],[0,0,12],3);meshPanel(g,[-12,0.1,96],[216,0,0],[0,0,12],3);
+ meshPanel(g,[-12,0.1,0],[12,0,0],[0,0,96],3);meshPanel(g,[192,0.1,0],[12,0,0],[0,0,96],3);
  const bay=(zc,tilt)=>{const p=new THREE.Group();p.position.set(-20*IN,9.5*IN,zc*IN);p.rotation.z=tilt;g.add(p);
   const B=(x0,x1,y0,y1,z0,z1,m)=>{const b=new THREE.Mesh(new THREE.BoxGeometry((x1-x0)*IN,(y1-y0)*IN,(z1-z0)*IN),m);b.position.set((x0+x1)/2*IN,(y0+y1)/2*IN,(z0+z1)/2*IN);b.castShadow=true;p.add(b);return b;};
   B(-1.5,0,0,19.5,-10,10,t2);B(-2.2,-1.5,15,17.5,-6,6,mat.pt);B(-2.4,-1.5,16,18,-3,3,mat.galv);
@@ -1800,7 +1808,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  
  // metal roof: 4 sheets, x -3..133
  quad(g,[[-3,yr(-6),-6],[133,yr(-6),-6],[133,yr(102),102],[-3,yr(102),102]],mat.metal);
- for(let z=-6;z<=102;z+=9){const rb=box(g,-3,133,0,0.6,z,z+0.8,mat.metal);rb.position.y=(yr(z)+0.3)*IN;}
+ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-3;x<=133;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  for(const x of [31,65,99]){const sm=box(g,x,x+0.6,0,0.8,-6,102,M(0x6f777c));sm.position.y=(yr(48)+0.6)*IN;sm.scale.z=Math.hypot(108,27)/108;sm.rotation.x=Math.atan2(24,96);}
  // HC top + run walls
  meshPanel(g,[133,yr(0)-0.5,0],[59,0,0],[0,-24,96]);
@@ -1842,7 +1850,7 @@ const groups={A:buildA(),B:buildB(),C:buildC(),D:buildD(),E:buildE(),F:buildF(),
 let cur='A';function setOpt(o){cur=o;groups.A.visible=o==='A';groups.B.visible=o==='B';groups.C.visible=o==='C';groups.D.visible=o==='D';groups.E.visible=o==='E';groups.F.visible=o==='F';groups.G.visible=o==='G';
  document.getElementById('title').textContent=o==='G'?'Option G — 8x16, all-PT framing, T1-11 coop with 12" HC vent band, framed walk-in door':o==='F'?'Option F — 8x16, low solid-floor 6x8 walk-in coop, rain-catchment waterer, 4 of Terry\'s sheets':o==='E'?'Option E — 8x16, 6x8 coop, feed bin, rain-catchment waterer, 4 of Terry\'s sheets':o==='D'?'Option D (FINAL) — lightweight lumber tractor, 3:12 shed roof of Terry\'s 3 metal sheets':o==='A'?'Option A — 2x4 lumber run, 3:12 shed metal roof':o==='B'?'Option B — cattle-panel hoop run, framed coop end':'Option C — lightweight value hoop: 4x4 skids, ply coop, owned metal on coop + coop half of hoop';
  for(const b of document.querySelectorAll('.opt'))b.classList.toggle('on',b.dataset.o===o);}
-const VIEWS={1:[[22,9,-13],[5.5,2.8,4]],2:[[6,4,-24],[6,3,4]],3:[[-6,24,-12],[6,1.5,4]]};const VIEWS_E={tilt:[[-6.8,2.4,9.3],[-1.2,1.2,4.6]],nest:[[-9.5,3.6,-1.5],[0,1.9,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+const VIEWS={1:[[22,9,-13],[5.5,2.8,4]],2:[[6,4,-24],[6,3,4]],3:[[-6,24,-12],[6,1.5,4]]};const VIEWS_E={under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[-6.8,2.4,9.3],[-1.2,1.2,4.6]],nest:[[-9.5,3.6,-1.5],[0,1.9,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
 function setView(v){const [p,t]=(cur==='E'||cur==='F'||cur==='G'?VIEWS_E:VIEWS)[v];camera.position.set(...p);controls.target.set(...t);controls.update();}
 let showLabels=true;function toggleLabels(){showLabels=!showLabels;for(const g of [groups.A,groups.B,groups.C,groups.D,groups.E,groups.F,groups.G,plab])g.userData.labels.visible=showLabels;}
 window.setOpt=setOpt;window.setView=setView;window.toggleLabels=toggleLabels;
