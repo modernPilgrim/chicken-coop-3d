@@ -6,7 +6,7 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 <div id="ui"><div id="title"></div>
 
 <button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button>
-<button onclick="toggleLabels()">Labels</button>
+<button onclick="toggleLabels()">Labels</button><button id="wbtn" onclick="toggleWheels()">Wheels up/down</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. Units: 1 grid square = 1 ft.</div></div>
 <script>
 console.warn('Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation'),
@@ -1499,9 +1499,27 @@ function coopBox(g,top,wm=mat.t111){ // top(x,z)->roof height at that point
 function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>top(z)+3.8;
  const cyl=(r,h,x,y,z,m,rx=0,rz=0)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r*IN,r*IN,h*IN,20),m);c.position.set(x*IN,y*IN,z*IN);c.rotation.x=rx;c.rotation.z=rz;c.castShadow=true;g.add(c);return c;};
  // skids, tow beam, eye bolts
- box(g,0,Lx,0,3.5,0,3.5,mat.skid);box(g,0,Lx,0,3.5,92.5,96,mat.skid);box(g,188.5,Lx,0,3.5,3.5,92.5,mat.skid);
+ {const sp=new THREE.Shape();sp.moveTo(0,2*IN);sp.lineTo(3*IN,0);sp.lineTo((Lx-3)*IN,0);sp.lineTo(Lx*IN,2*IN);sp.lineTo(Lx*IN,3.5*IN);sp.lineTo(0,3.5*IN);sp.closePath(); // skids with beveled (sled) ends
+  for(const z of [0,92.5]){const m=new THREE.Mesh(new THREE.ExtrudeGeometry(sp,{depth:3.5*IN,bevelEnabled:false}),mat.skid);m.position.z=z*IN;m.castShadow=m.receiveShadow=true;g.add(m);}}box(g,188.5,Lx,0,3.5,3.5,92.5,mat.skid);
  for(const z of [1.75,94.25]){const e=new THREE.Mesh(new THREE.TorusGeometry(1.3*IN,0.35*IN,8,16),mat.galv);e.position.set(195*IN,1.75*IN,z*IN);e.rotation.y=Math.PI/2;g.add(e);}
- for(const [zb,zw] of [[-3,-6.5],[96,99.5]]){box(g,3,21,0,10,zb,zb+3,mat.pt);cyl(5,3,12,5,zw+1.5,mat.tire,Math.PI/2);cyl(2.2,3.2,12,5,zw+1.5,mat.hub,Math.PI/2);}
+ // DROP-DOWN WHEELS: Marathon 15.5" flat-free (6" hub, 5/8" axle) on pin-adjustable sliding PT 2x6 legs in steel-strap guides on a PT 2x6 backer bolted to skid + coop corner framing
+ const WG=new THREE.Group();g.add(WG);g.userData.W=WG;
+ for(const sd of [-1,1]){const zo=sd<0?0:96, out=(v)=>sd<0?zo-v:zo+v; const zr=(a,b)=>[Math.min(out(a),out(b)),Math.max(out(a),out(b))];
+  {const [z0,z1]=zr(0,1.5);box(g,4,20,0.5,30,z0,z1,mat.pt);} // backer, through-bolted (3x 1/2") to skid, rim and corner post
+  for(const y of [12,24]){const [z0,z1]=zr(1.5,3.25);box(g,8.5,15.5,y,y+1.5,z0,z1,mat.galv);} // 1/4x1.5 steel strap guides
+  for(const y of [12.75,24.75]){const [a,b]=zr(1.4,3.4);cyl(0.35,b-a,7.8,y,(a+b)/2,mat.galv,Math.PI/2);cyl(0.35,b-a,16.2,y,(a+b)/2,mat.galv,Math.PI/2);}
+  const L=new THREE.Group();WG.add(L);
+  const LB=(x0,x1,y0,y1,a,b,m)=>{const [z0,z1]=zr(a,b);const bb=new THREE.Mesh(new THREE.BoxGeometry((x1-x0)*IN,(y1-y0)*IN,(z1-z0)*IN),m);bb.position.set((x0+x1)/2*IN,(y0+y1)/2*IN,(z0+z1)/2*IN);bb.castShadow=true;L.add(bb);return bb;};
+  LB(9.25,14.75,-3,24,1.5,3,mat.pt); // sliding 2x6 leg, axle hole near bottom
+  for(let k=0;k<4;k++){const [a,b]=zr(1.45,3.05);const h=new THREE.Mesh(new THREE.CylinderGeometry(0.3*IN,0.3*IN,(b-a)*IN,10),M(0x222222));h.rotation.x=Math.PI/2;h.position.set(12*IN,(10+k*2)*IN,(a+b)/2*IN);L.add(h);} // pin holes 2" o.c.
+  {const [a,b]=zr(0,11);const ax=new THREE.Mesh(new THREE.CylinderGeometry(0.31*IN,0.31*IN,(b-a)*IN,10),mat.galv);ax.rotation.x=Math.PI/2;ax.position.set(12*IN,0,(a+b)/2*IN);L.add(ax);}
+  {const [a,b]=zr(3.6,7.2);const zc=(a+b)/2;const t=new THREE.Mesh(new THREE.CylinderGeometry(7.75*IN,7.75*IN,3.6*IN,28),mat.tire);t.rotation.x=Math.PI/2;t.position.set(12*IN,0,zc*IN);t.castShadow=true;L.add(t);
+   const r=new THREE.Mesh(new THREE.CylinderGeometry(4*IN,4*IN,3.8*IN,20),M(0xeeeeee));r.rotation.x=Math.PI/2;r.position.set(12*IN,0,zc*IN);L.add(r);
+   const hb=new THREE.Mesh(new THREE.CylinderGeometry(1.2*IN,1.2*IN,6*IN,12),mat.hub);hb.rotation.x=Math.PI/2;hb.position.set(12*IN,0,zc*IN);L.add(hb);}
+  const pin=new THREE.Group();pin.userData.isPin=true;g.add(pin);
+  {const [a,b]=zr(-0.5,4.5);const p=new THREE.Mesh(new THREE.CylinderGeometry(0.25*IN,0.25*IN,(b-a)*IN,10),M(0xd02020));p.rotation.x=Math.PI/2;p.position.set(12*IN,21.25*IN,(a+b)/2*IN);pin.add(p);
+   const c=new THREE.Mesh(new THREE.TorusGeometry(0.8*IN,0.12*IN,6,14),M(0xd02020));c.position.set(12*IN,20.45*IN,out(4.6)*IN);pin.add(c);}
+ }
  // rim
  box(g,0,Lx,3.5,5,0,3.5,mat.pt);box(g,0,Lx,3.5,5,92.5,96,mat.pt);
  // posts
@@ -1593,11 +1611,13 @@ function person(){const g=new THREE.Group();const c=(r,h,y,m,x=0)=>{const k=new 
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",-30,80,-30,0.8);scene.add(plab.userData.labels);
 const G=buildG();scene.add(G);
 document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over nest/feed row';
-const VIEWS={nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[-5.6,4.2,8.6],[-0.6,2.4,6.0]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+const VIEWS={wheel:[[2.2,2.4,-6.8],[1.0,1.1,0]],nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[-5.6,4.2,8.6],[-0.6,2.4,6.0]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
 function setView(v){const [p,t]=VIEWS[v]||VIEWS.nest3q;camera.position.set(...p);controls.target.set(...t);controls.update();}
 let showLabels=true;function toggleLabels(){showLabels=!showLabels;for(const g of [G,plab])g.userData.labels.visible=showLabels;}
-window.setView=setView;window.toggleLabels=toggleLabels;
-const q=new URLSearchParams(location.search);setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
+let wheelsDown=true;function setWheels(d){wheelsDown=d;G.position.y=(d?2.5:0)*IN;G.userData.W.position.y=(d?5.25:9.25)*IN;document.getElementById('wbtn').textContent=d?'Wheels: DOWN (moving) → raise':'Wheels: UP (parked) → lower';}
+function toggleWheels(){setWheels(!wheelsDown);}
+window.setView=setView;window.toggleLabels=toggleLabels;window.toggleWheels=toggleWheels;
+const q=new URLSearchParams(location.search);setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();setWheels(q.get('wheels')!=='up');
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
 window.__ready=true;
