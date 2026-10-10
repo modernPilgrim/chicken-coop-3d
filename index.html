@@ -1773,22 +1773,22 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  for(const y of [14,40,66])box(g,53,57,y,y+1.5,-3.4,-2.2,M(0x222222));box(g,16,19,42,46,-3.4,-2.2,mat.galv);box(g,10,60,top(0)-9,top(0)-4,-1.8,-0.6,M(0x333333));
  box(g,72.6,73.6,10,25,40,53,M(0x777777));box(g,73.6,83,0,5,40,54,mat.ramp);
  // 3 nest boxes (14w x 14d x 14h) beside the feed bay, same cantilever row; floor 9.5" AGL
- for(let i=0;i<3;i++){const z0=12+i*15.17;box(g,-14,0,9.5,23.5,z0,z0+15.17,mat.nest);box(g,-14.6,-14,13,15,z0+6.5,z0+8.5,mat.galv);}
- const lid=box(g,-16,1,24,25,11.5,58,mat.metal);lid.rotation.z=-0.12;
- for(let z=13;z<=57;z+=6){const r=box(g,-16,1,0,0.5,z,z+0.6,mat.metal);r.position.set(-7.5*IN,24.9*IN,(z+0.3)*IN);r.rotation.z=-0.12;} // nest lid ribs down its slope
+ for(let i=0;i<3;i++){const z0=12+i*15.17;box(g,-14,0,19.5,33.5,z0,z0+15.17,mat.nest);box(g,-14.6,-14,23,25,z0+6.5,z0+8.5,mat.galv);}
+ const lid=box(g,-16,1,34,35,11.5,58,mat.metal);lid.rotation.z=-0.12;
+ for(let z=13;z<=57;z+=6){const r=box(g,-16,1,0,0.5,z,z+0.6,mat.metal);r.position.set(-7.5*IN,34.9*IN,(z+0.3)*IN);r.rotation.z=-0.12;} // nest lid ribs down its slope
  // feed bin under coop (front side, gasketed front-hinged lid)
  // tilt-out feed cubby under nest boxes: interior 20.5" high x 20" deep, 2 bays, each bottom-hinged door + carrier holding upright Vittles Vault 25 lb (12x12x13.75)
  // cantilevered off end-wall framing: 3 PT 2x4 brackets (bottom chord, top chord, front post, knee brace) through-bolted to sistered end-wall studs; nothing touches ground
  // nest row: PT 2x4 bottom chords (z 12, 29, 43, 57.5) bolted to sistered end-wall studs, each with a 2x4 hanger brace inside the nest side/divider up to the wall at 23"
  for(const z0 of [12,29,43]){box(g,-14,0,7.5,9,z0,z0+3.5,mat.pt);}
  // feed bay: full brackets (bottom chord, top chord, front post, knee brace) at z 57.5 and 81
- for(const z0 of [57.5,81]){box(g,-20,0,7.5,9,z0,z0+3.5,mat.pt);box(g,-20,0,28,29.5,z0,z0+3.5,mat.pt);box(g,-20,-18.5,9,28,z0,z0+3.5,mat.pt);
+ for(const z0 of [57.5,81]){box(g,-20,0,7.5,9,z0,z0+3.5,mat.pt);box(g,-20,0,31.5,33,z0,z0+3.5,mat.pt);box(g,-20,-18.5,9,31.5,z0,z0+3.5,mat.pt);
   const d=box(g,-22.5,4,17.75,19.25,z0,z0+3.5,mat.pt);d.position.x=-9.25*IN;d.position.y=18.5*IN;d.rotation.z=Math.atan2(19,-18.5);
-  for(const y of [8.25,28.75])box(g,0,0.8,y-0.4,y+0.4,z0+1.3,z0+2.2,mat.galv);}
- box(g,-14.6,-14,7.5,9.5,12,57.5,t2);box(g,-14,0,9,9.5,12,57.5,t2);box(g,-20,0,9,9.5,57.5,84.5,t2);box(g,-20,0,29.5,30,57.5,84.5,t2);
- for(const z of [56.9,84.5])box(g,-20,0,7.5,30,z,z+0.6,t2);
+  for(const y of [8.25,32.25])box(g,0,0.8,y-0.4,y+0.4,z0+1.3,z0+2.2,mat.galv);}
+ box(g,-14.6,-14,7.5,19.5,12,57.5,t2);box(g,-14,0,19,19.5,12,57.5,t2);box(g,-14,0,9,9.5,12,57.5,t2);box(g,-20,0,9,9.5,57.5,84.5,t2);box(g,-20,0,33,33.5,57.5,84.5,t2);
+ for(const z of [56.9,84.5])box(g,-20,0,7.5,33.5,z,z+0.6,t2);
 
- const ct=box(g,-22,0,30,30.5,56,86.5,mat.metal);for(let z=57;z<=85;z+=6)box(g,-22,0,30.5,30.9,z,z+0.6,mat.metal);
+ const ct=box(g,-22,0,33.5,34,56,86.5,mat.metal);for(let z=57;z<=85;z+=6)box(g,-22,0,34,34.4,z,z+0.6,mat.metal);
  // PREDATOR CLOSURE: PT 2x4 cross sills at coop end (x=0) and coop/run line (x=68.5) close the 3.5" gap under the coop floor between skids;
  // 1/2" HC stapled across underside of coop floor framing -> under-coop void fully enclosed, not connected to run.
  box(g,0,3.5,0,3.5,3.5,92.5,mat.pt);box(g,68.5,72,0,3.5,3.5,92.5,mat.pt);meshPanel(g,[0,0.15,0],[72,0,0],[0,0,96],2);
