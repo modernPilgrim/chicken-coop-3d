@@ -1650,7 +1650,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  // Coop section (x 0..60) has no apron: solid floor (2x4 PT framing + deck @ 7-1/2") with 1/2" HC across the underside and 2x4 sills closing the
  // under-coop void, so nothing can dig in there. Run apron starts at x=60 (12" past the coop/run line at x=72) to close the run-to-coop transition.
  // Strips: 12" wide 1/2" HC, 1x2 PT batten on the outer edge, hog-ringed to a hinge line on the skid/rim outer face (y=4, 0.9" off the face).
- // Run door: its strip is hog-ringed to the door's bottom rail and swings with the door. Hitch end: hinged on the top-front edge of the 6x6 beam,
+ // Run door: covered by a continuous skid-hinged strip; door (bottom @ 6") swings over it when parked. Hitch end: hinged on the top-front edge of the 6x6 beam,
  // flips up and back to lean on the run front (clear of eye bolts + chains); 12x12 corner tabs fold in over the end strips.
  const AP=[];g.userData.AP=AP;const BAT=mat.pt;
  const hog=(x,y,z,ax)=>{const t=new THREE.Mesh(new THREE.TorusGeometry(0.42*IN,0.07*IN,6,12),mat.galv);t.position.set(x*IN,y*IN,z*IN);if(ax==='x')t.rotation.y=Math.PI/2;g.add(t);};
@@ -1661,10 +1661,10 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
    meshPanel(p,[0,0,0],[L,0,0],[0,0,12*s],2);box(p,0,L,0,0.75,s<0?-12:10.5,s<0?-10.5:12,BAT);
    const d=Math.asin(Math.min(1,yh/12));AP.push({p,ax:'x',down:s<0?-d:d,up:s<0?Math.PI/2:-Math.PI/2,tag});
    for(let x=x0+2;x<=x1-1;x+=12)hog(x,yh,zh-s*0.35,'x');};
- const SEC={z0:[[60,108],[108,154],[180.5,198]],z96:[[60,106],[106,152],[152,198]]};
+ const SEC={z0:[[60,108],[108,152],[152,198]],z96:[[60,106],[106,152],[152,198]]};
  for(const [a,b] of SEC.z0)side(a,b,4,-0.9,-1,'z0');
  for(const [a,b] of SEC.z96)side(a,b,4,96.9,1,'z96');
- side(154.8,179.7,6.3,-2.1,-1,'door'); // on run door bottom rail (25" strip)
+ // run door: no door strip; the 46" z0 strip under the door hinges on the skid like the rest (door bottom at 6" clears the parked strip)
  // hitch end: hinge along z at beam top-front edge (x=198, y=7.5); two 48" strips + 12x12 corner tabs
  for(const [z0,z1,tz] of [[0,48,0],[48,96,96]]){const p=new THREE.Group();p.position.set(198*IN,7.6*IN,z0*IN);g.add(p);const L=z1-z0;
    meshPanel(p,[0,0,0],[0,0,L],[12,0,0],2);box(p,10.5,12,0,0.75,0,L,BAT);
@@ -1675,11 +1675,11 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  const KP=[];g.userData.KP=KP;
  for(const x of [71.25,107.75,143.75,152.75,190.25])KP.push(hook(x,17,-1.4,'x'));
  for(const x of [71.25,107.75,143.75,190.25,130,170])KP.push(hook(x,17,97.4,'x'));
- for(const x of [156.25,178.25])KP.push(hook(x,19.5,-2.5,'x'));
+ for(const x of [181.75])KP.push(hook(x,17,-1.4,'x'));
  for(const z of [1.75,46,50,94.25])KP.push(hook(192.8,20,z,'z'));
  {const al=(t,x,y,z,sz=0.3)=>label({userData:{labels:DG.apron}},t,x,y,z,sz);
   al('flip-up apron strip: 12" of 1/2" HC + 1x2 PT batten',192,-3,-20,0.32);al('hog rings @ 12" = hinge line on skid/rim',196,3,-6,0.28);
-  al('hook-and-eye keeper ~15" up (on posts)',184,20,-6,0.28);al('door strip rides on run door bottom rail',166,24,-8,0.28);
+  al('hook-and-eye keeper ~15" up (on posts)',184,20,-6,0.28);al('strip under run door hinges on skid; door swings over it',166,24,-8,0.28);
   al('hitch-end strips flip back onto run front, corner tabs fold in',206,20,30,0.28);}
  // under-coop HC
  
@@ -1718,7 +1718,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48);label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
  label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed bay (outside, top lid)',-14,52,NZ0+3.5*NBW,0.8);label(g,'pop door + step',80,30,48,0.75);
  label(g,'rain barrel + nipples',120,52,82,0.8);
- label(g,'3 rollaway nest boxes (inside)',12,58,NZ0+1.5*NBW,0.8);label(g,'Egg tray + lid (outside)',-12,6,NZ0+1.5*NBW,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);label(g,'flip-up HC apron (run only, 7 strips + door strip)',130,-4,-16,0.75);
+ label(g,'3 rollaway nest boxes (inside)',12,58,NZ0+1.5*NBW,0.8);label(g,'Egg tray + lid (outside)',-12,6,NZ0+1.5*NBW,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);label(g,'flip-up HC apron (run only, 8 strips)',130,-4,-16,0.75);
  dim(g,[0,0,-24],[192,0,-24],"16'-0\"",[0,6,0]);dim(g,[208,0,0],[208,0,96],"8'-0\"",[0,6,0]);dim(g,[0,0,-14],[72,0,-14],"6' coop",[0,5,0]);dim(g,[-24,0,-6],[-24,84,-6],"7'-0\"",[-8,0,0]);
  return g;}
 // person 6' reference
