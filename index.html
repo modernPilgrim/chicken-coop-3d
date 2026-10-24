@@ -5,7 +5,7 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #hint{font-size:12px;color:#444;margin-top:4px}</style></head><body>
 <div id="ui"><div id="title"></div>
 
-<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('nestin')">Nests inside</button><button onclick="setView('nestsec')">Nest section</button>
+<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('nestin')">Nests inside</button><button onclick="setView('nestsec')">Nest section</button><button onclick="setView('roost')">Roost</button>
 <button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button><button id="abtn" onclick="toggleApron()">Apron</button><button id="tbtn" onclick="toggleTray()">Egg tray</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. Units: 1 grid square = 1 ft.</div></div>
 <script>
@@ -1643,6 +1643,32 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
   nl(NDG,'hinged + latched clean-out top',14,53,zm+8,0.3);nl(NDG,'4" front lip + landing board',27,19,zm+8,0.3);
   nl(NDI,'3 rollaway nest boxes (inside)',12,57,zm+4,0.45);nl(NDI,'hinged, latched tops (clean-out from inside)',12,55,NZ0+0.5*NBW,0.36);nl(NDI,'baffle hides the egg slot',14,33,NZ0+2.5*NBW,0.36);
   nl(NDI,'4" lip + landing board',30,23,NZ0+NBW,0.36);nl(NDI,'turf pad, floor sloped 11° to wall',18,27,NZ0+0.5*NBW,0.36);nl(NDI,'2x4 legs + wall ledger',22,11,NZ0+NBW*2.6,0.36);}
+ // ---------- ROOST (ladder style, 2 lift-out PT 2x4 bars laid flat) + SLIDE-OUT DROPPINGS BOARD ----------
+ // On the back (z=96) wall, opposite the door. Inside face of the back-wall studs = z 92.5. Bars x 28..72 (44"): the nest boxes + landing board
+ // occupy x<=27, z 24..69.9, and the 12"-out lower bar/board overlap that z range, so the roost starts 1" past the landing board.
+ // Upper bar top 42" AGL (34.5" above the coop floor), centred 12" off the wall (z 80.5); lower bar top 30" AGL (22.5" above floor), z 68.5.
+ // Two PT 2x4 side frames (one at each bar end): back post + front leg + lower arm + upper arm + strut; bars drop into notches (stop blocks) -> lift out.
+ // Back posts screwed to two horizontal 2x4 wall ledgers lagged to the back-wall studs (x 34.5, 69.5).
+ // Droppings board: 3/4" ply 40-3/4 x 28, top 22" AGL (8" under the lower bar), on a 2x4 back-wall cleat + a 2x4 front ledger between the front legs;
+ // slides out toward the door between the legs. Clear of the door (z=0 wall), nest boxes (x<=27) and pop door (x=72 wall, z 40..53).
+ {const RX0=28,RX1=72,RB=[{zc:80.5,yt:42},{zc:68.5,yt:30}],BY=22,BZ0=64.5,RG=new THREE.Group();DG.roost=RG;g.add(RG);
+  for(const b of RB)box(g,RX0,RX1,b.yt-1.5,b.yt,b.zc-1.75,b.zc+1.75,mat.pt); // the two bars, 3.5" face up
+  for(const [a,c] of [[RX0,RX0+1.5],[RX1-1.5,RX1]]){
+   box(g,a,c,7.5,40.5,87.5,91,mat.pt); // back post
+   box(g,a,c,7.5,25,BZ0,BZ0+3.5,mat.pt); // front leg
+   box(g,a,c,25,28.5,BZ0,91,mat.pt); // lower arm (on edge)
+   box(g,a,c,37,40.5,73,91,mat.pt); // upper arm (on edge)
+   box(g,a,c,28.5,37,73,76.5,mat.pt); // strut lower arm -> upper arm
+   for(const b of RB)for(const z of [b.zc-3.25,b.zc+1.75])box(g,a,c,b.yt-1.5,b.yt-0.75,z,z+1.5,mat.pt);} // notch stops either side of each bar
+  box(g,RX0,RX1,37,40.5,91,92.5,mat.pt); // wall ledger (upper), lagged to studs
+  box(g,RX0,RX1,BY-4.25,BY-0.75,91,92.5,mat.pt); // wall cleat for the droppings board, lagged to studs
+  box(g,RX0+1.5,RX1-1.5,BY-4.25,BY-0.75,BZ0,BZ0+3.5,mat.pt); // front ledger between the front legs
+  box(g,RX0+1.625,RX1-1.625,BY-0.75,BY,BZ0,92.5,mat.ply); // 3/4 ply droppings board
+  label(g,'roost: 2x 2x4 flat, 44", ladder 12"/12"',46,44,72,0.75);label(g,'slide-out droppings board',40,14,72,0.75);
+  const rl=(t,x,y,z,sz=0.36)=>label({userData:{labels:RG}},t,x,y,z,sz);
+  rl('roost: 2x 2x4 flat, 44", ladder 12"/12"',40,53,82,0.42);rl('upper bar top 42" AGL (34-1/2" above floor), 12" off wall',40,48.5,82);
+  rl('lower bar top 30" AGL (22-1/2" above floor), 24" off wall',38,34,62);rl('bars lift out of notched 2x4 arms',64,24,60,0.32);
+  rl('slide-out droppings board',44,17,52,0.42);rl('3/4" ply 40-3/4 x 28, 8" below lower bar, on 2x4 cleat + front ledger',44,13.5,52,0.32);}
  // PREDATOR CLOSURE: PT 2x4 cross sills at coop end (x=0) and coop/run line (x=68.5) close the 3.5" gap under the coop floor between skids;
  // 1/2" HC stapled across underside of coop floor framing -> under-coop void fully enclosed, not connected to run.
  box(g,0,3.5,0,3.5,3.5,92.5,mat.pt);box(g,68.5,72,0,3.5,3.5,92.5,mat.pt);meshPanel(g,[0,0.15,0],[72,0,0],[0,0,96],2);
@@ -1730,16 +1756,16 @@ function person(){const g=new THREE.Group();const c=(r,h,y,m,x=0)=>{const k=new 
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",-30,80,-30,0.8);scene.add(plab.userData.labels);
 const G=buildG();scene.add(G);
 document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over egg tray + feed bay';
-const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-4.6,0.9,9.6],[0.4,0.9,4.6]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-8.8,3.4,-0.9],[-0.4,1.9,4.1]],tray:[[-6.6,3.6,0.2],[-0.2,2.0,4.0]],nestin:[[8.6,5.2,0.0],[1.1,2.55,4.1]],nestsec:[[0.95,2.75,-1.4],[0.75,2.45,3.9]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-4.6,0.9,9.6],[0.4,0.9,4.6]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-8.8,3.4,-0.9],[-0.4,1.9,4.1]],tray:[[-6.6,3.6,0.2],[-0.2,2.0,4.0]],nestin:[[8.6,5.2,0.0],[1.1,2.55,4.1]],nestsec:[[0.95,2.75,-1.4],[0.75,2.45,3.9]],roost:[[10.2,5.0,1.2],[4.2,2.5,6.6]],roostnest:[[9.2,6.7,-2.5],[3,2.4,5]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
 let showLabels=true,detailView=false,hitchUp=false,apronUp=false,trayOpen=false,curView='nest3q';
 // cutaway views: section through the middle nest box (keep z > box centre) / inside view (drop front wall + roof)
-renderer.localClippingEnabled=true;const CLIP={nestsec:[new THREE.Plane(new THREE.Vector3(0,0,1),-(24+1.5*15.17)*IN)],nestin:[new THREE.Plane(new THREE.Vector3(0,0,1),-4*IN),new THREE.Plane(new THREE.Vector3(0,-1,0),56*IN),new THREE.Plane(new THREE.Vector3(-1,0,0),62*IN)]};
+renderer.localClippingEnabled=true;const CLIP={nestsec:[new THREE.Plane(new THREE.Vector3(0,0,1),-(24+1.5*15.17)*IN)],nestin:[new THREE.Plane(new THREE.Vector3(0,0,1),-4*IN),new THREE.Plane(new THREE.Vector3(0,-1,0),56*IN),new THREE.Plane(new THREE.Vector3(-1,0,0),62*IN)]};CLIP.roost=CLIP.roostnest=[CLIP.nestin[0],CLIP.nestin[1],new THREE.Plane(new THREE.Vector3(-1,0,0),72.4*IN)];
 function applyClip(v){const pl=CLIP[v]||null;G.traverse(o=>{if(!o.material||o.isSprite||o.isLine)return;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){if(m.userData.side0===undefined)m.userData.side0=m.side;m.clippingPlanes=pl;m.clipShadows=!!pl;m.side=pl?THREE.DoubleSide:m.userData.side0;m.needsUpdate=true;}});}
 function setTray(open){trayOpen=open;const L=G.userData.TLID;L.rotation.z=open?L.userData.open:L.userData.closed;const b=document.getElementById('tbtn');if(b)b.textContent=open?'Egg tray: OPEN → close':'Egg tray: closed → open';}
 function toggleTray(){setTray(!trayOpen);}
 function showGhost(){const T=G.userData.GT.userData,on=hitchUp||curView==='hitch';T.ghost.visible=T.chain.visible=on;}
 function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lab.visible=showLabels&&detailView==='hitch';}
-function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron'||v==='nestsec'||v==='nestin')?v:false;curView=v;applyClip(v);showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
+function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron'||v==='nestsec'||v==='nestin'||v==='roost')?v:v==='roostnest'?'roost':false;curView=v;applyClip(v);showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
 function toggleLabels(){showLabels=!showLabels;applyLabels();}
 scene.add(G.userData.GT);
 function setHitch(up){hitchUp=up;const BP=G.userData.BP,GT=G.userData.GT;
