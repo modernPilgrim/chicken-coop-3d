@@ -5,8 +5,8 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #hint{font-size:12px;color:#444;margin-top:4px}</style></head><body>
 <div id="ui"><div id="title"></div>
 
-<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button>
-<button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button>
+<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button>
+<button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button><button id="abtn" onclick="toggleApron()">Apron</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. Units: 1 grid square = 1 ft.</div></div>
 <script>
 console.warn('Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation'),
@@ -1523,7 +1523,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
   const t=new THREE.Mesh(new THREE.TorusGeometry(1.15*IN,0.38*IN,10,20),mat.galv);t.position.set(199.9*IN,BP.ey*IN,z*IN);t.castShadow=true;g.add(t); // eye (vertical plane)
   cyl(1.3,0.19,193.0,BP.ey,z,mat.galv,0,Math.PI/2);cyl(0.65,0.65,193.5,BP.ey,z,mat.galv,0,Math.PI/2);} // washer+nut (counterbored behind)
  // close-up callouts (Bridle / Skid-runner views)
- const DG={hitch:new THREE.Group(),runner:new THREE.Group()};g.userData.DG=DG;g.add(DG.hitch,DG.runner);let dk='hitch';const dl=(t,x,y,z,sz=0.42)=>label({userData:{labels:DG[dk]}},t,x,y,z,sz);
+ const DG={hitch:new THREE.Group(),runner:new THREE.Group(),apron:new THREE.Group()};g.userData.DG=DG;g.add(DG.hitch,DG.runner,DG.apron);let dk='hitch';const dl=(t,x,y,z,sz=0.42)=>label({userData:{labels:DG[dk]}},t,x,y,z,sz);
  dl('PT 6x6 x 8\' bridle beam at skid level',198,16,36,0.4);
  dl('3/4" forged galv eye bolt (L), nut+washer behind',204,12,4,0.36);dl('3/4" forged galv eye bolt (R)',206,11,100,0.36);
  dl('1/4x3 steel strap brackets + 1/2" carriage bolts',196,-4,-6,0.34);dl('nothing passes through run mesh',180,26,48,0.34);
@@ -1576,9 +1576,41 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  // PREDATOR CLOSURE: PT 2x4 cross sills at coop end (x=0) and coop/run line (x=68.5) close the 3.5" gap under the coop floor between skids;
  // 1/2" HC stapled across underside of coop floor framing -> under-coop void fully enclosed, not connected to run.
  box(g,0,3.5,0,3.5,3.5,92.5,mat.pt);box(g,68.5,72,0,3.5,3.5,92.5,mat.pt);meshPanel(g,[0,0.15,0],[72,0,0],[0,0,96],2);
- // continuous 12" outward HC ground apron around entire 8x16 footprint incl. coop sides and cubby end
- meshPanel(g,[-12,0.1,-12],[216,0,0],[0,0,12],3);meshPanel(g,[-12,0.1,96],[216,0,0],[0,0,12],3);
- meshPanel(g,[-12,0.1,0],[12,0,0],[0,0,96],3);meshPanel(g,[192,0.1,0],[12,0,0],[0,0,96],3);
+ // ---------- FLIP-UP HC APRON (run perimeter only) ----------
+ // Coop section (x 0..60) has no apron: solid floor (2x4 PT framing + deck @ 7-1/2") with 1/2" HC across the underside and 2x4 sills closing the
+ // under-coop void, so nothing can dig in there. Run apron starts at x=60 (12" past the coop/run line at x=72) to close the run-to-coop transition.
+ // Strips: 12" wide 1/2" HC, 1x2 PT batten on the outer edge, hog-ringed to a hinge line on the skid/rim outer face (y=4, 0.9" off the face).
+ // Run door: its strip is hog-ringed to the door's bottom rail and swings with the door. Hitch end: hinged on the top-front edge of the 6x6 beam,
+ // flips up and back to lean on the run front (clear of eye bolts + chains); 12x12 corner tabs fold in over the end strips.
+ const AP=[];g.userData.AP=AP;const BAT=mat.pt;
+ const hog=(x,y,z,ax)=>{const t=new THREE.Mesh(new THREE.TorusGeometry(0.42*IN,0.07*IN,6,12),mat.galv);t.position.set(x*IN,y*IN,z*IN);if(ax==='x')t.rotation.y=Math.PI/2;g.add(t);};
+ const hook=(x,y,z,ax)=>{const h=new THREE.Group();g.add(h);const s=box(h,-0.15,0.15,-1.6,0,-0.15,0.15,mat.galv);const t=new THREE.Mesh(new THREE.TorusGeometry(0.3*IN,0.08*IN,6,10,Math.PI),mat.galv);t.position.set(0,-1.6*IN,(ax==='x'?0:0.3)*IN);if(ax==='x')t.rotation.y=Math.PI/2;h.add(t);
+   {const c=new THREE.Mesh(new THREE.CylinderGeometry(0.35*IN,0.35*IN,0.5*IN,10),mat.galv);c.rotation.x=Math.PI/2;h.add(c);}h.position.set(x*IN,y*IN,z*IN);return h;};
+ // side strip: hinge along x at (yh, zh); s=-1 for z=0 side (outward = -z), +1 for z=96 side
+ const side=(x0,x1,yh,zh,s,tag)=>{const p=new THREE.Group();p.position.set(x0*IN,yh*IN,zh*IN);g.add(p);const L=x1-x0;
+   meshPanel(p,[0,0,0],[L,0,0],[0,0,12*s],2);box(p,0,L,0,0.75,s<0?-12:10.5,s<0?-10.5:12,BAT);
+   const d=Math.asin(Math.min(1,yh/12));AP.push({p,ax:'x',down:s<0?-d:d,up:s<0?Math.PI/2:-Math.PI/2,tag});
+   for(let x=x0+2;x<=x1-1;x+=12)hog(x,yh,zh-s*0.35,'x');};
+ const SEC={z0:[[60,108],[108,154],[180.5,198]],z96:[[60,106],[106,152],[152,198]]};
+ for(const [a,b] of SEC.z0)side(a,b,4,-0.9,-1,'z0');
+ for(const [a,b] of SEC.z96)side(a,b,4,96.9,1,'z96');
+ side(154.8,179.7,6.3,-2.1,-1,'door'); // on run door bottom rail (25" strip)
+ // hitch end: hinge along z at beam top-front edge (x=198, y=7.5); two 48" strips + 12x12 corner tabs
+ for(const [z0,z1,tz] of [[0,48,0],[48,96,96]]){const p=new THREE.Group();p.position.set(198*IN,7.6*IN,z0*IN);g.add(p);const L=z1-z0;
+   meshPanel(p,[0,0,0],[0,0,L],[12,0,0],2);box(p,10.5,12,0,0.75,0,L,BAT);
+   const tab=new THREE.Group();tab.position.set(0,0,(tz-z0)*IN);p.add(tab);const ts=tz===0?-1:1;meshPanel(tab,[0,0,0],[0,0,12*ts],[12,0,0],2);
+   AP.push({p,ax:'z',down:-Math.atan2(7.5,Math.sqrt(144-56.25)),up:Math.PI/2+Math.asin(5.2/12),tab,ts,tag:'end'});
+   for(let z=z0+3;z<=z1-2;z+=12)hog(198.2,7.6,z,'z');}
+ // keepers: screen-door hook-and-eye on posts (hook tip ~15" up), bungee S-hooks through the HC where there's no post
+ const KP=[];g.userData.KP=KP;
+ for(const x of [71.25,107.75,143.75,152.75,190.25])KP.push(hook(x,17,-1.4,'x'));
+ for(const x of [71.25,107.75,143.75,190.25,130,170])KP.push(hook(x,17,97.4,'x'));
+ for(const x of [156.25,178.25])KP.push(hook(x,19.5,-2.5,'x'));
+ for(const z of [1.75,46,50,94.25])KP.push(hook(192.8,20,z,'z'));
+ {const al=(t,x,y,z,sz=0.3)=>label({userData:{labels:DG.apron}},t,x,y,z,sz);
+  al('flip-up apron strip: 12" of 1/2" HC + 1x2 PT batten',192,-3,-20,0.32);al('hog rings @ 12" = hinge line on skid/rim',196,3,-6,0.28);
+  al('hook-and-eye keeper ~15" up (on posts)',184,20,-6,0.28);al('door strip rides on run door bottom rail',166,24,-8,0.28);
+  al('hitch-end strips flip back onto run front, corner tabs fold in',206,20,30,0.28);}
  // under-coop HC
  
  // metal roof: 4 sheets, x -3..133
@@ -1616,7 +1648,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48);label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
  label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed box (top lid)',-14,44,71,0.8);label(g,'pop door + step',80,30,48,0.75);
  label(g,'rain barrel + nipples',120,52,82,0.8);
- label(g,'3 nest boxes',-14,34,36,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);
+ label(g,'3 nest boxes',-14,34,36,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);label(g,'flip-up HC apron (run only, 7 strips + door strip)',130,-4,-16,0.75);
  dim(g,[0,0,-24],[192,0,-24],"16'-0\"",[0,6,0]);dim(g,[208,0,0],[208,0,96],"8'-0\"",[0,6,0]);dim(g,[0,0,-14],[72,0,-14],"6' coop",[0,5,0]);dim(g,[-24,0,-6],[-24,84,-6],"7'-0\"",[-8,0,0]);
  return g;}
 // person 6' reference
@@ -1628,11 +1660,11 @@ function person(){const g=new THREE.Group();const c=(r,h,y,m,x=0)=>{const k=new 
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",-30,80,-30,0.8);scene.add(plab.userData.labels);
 const G=buildG();scene.add(G);
 document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over nest/feed row';
-const VIEWS={hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
-let showLabels=true,detailView=false,hitchUp=false,curView='nest3q';
+const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+let showLabels=true,detailView=false,hitchUp=false,apronUp=false,curView='nest3q';
 function showGhost(){const T=G.userData.GT.userData,on=hitchUp||curView==='hitch';T.ghost.visible=T.chain.visible=on;}
 function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lab.visible=showLabels&&detailView==='hitch';}
-function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner')?v:false;curView=v;showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
+function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron')?v:false;curView=v;showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
 function toggleLabels(){showLabels=!showLabels;applyLabels();}
 scene.add(G.userData.GT);
 function setHitch(up){hitchUp=up;const BP=G.userData.BP,GT=G.userData.GT;
@@ -1665,9 +1697,13 @@ function setHitch(up){hitchUp=up;const BP=G.userData.BP,GT=G.userData.GT;
    const m=new THREE.Mesh(lg,cm);m.scale.set(1,1.6,1);m.position.copy(P);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d);
    if(i%2)m.rotateY(Math.PI/2);m.castShadow=true;CH.add(m);}}
  showGhost();document.getElementById('hbtn').textContent=up?'Hitch: LIFTED (towing) → lower':'Hitch: DOWN (parked) → lift';}
-function toggleHitch(){setHitch(!hitchUp);}
-window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;
-const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
+function setApron(up){apronUp=up;for(const a of G.userData.AP){const r=up?a.up:a.down;if(a.ax==='x')a.p.rotation.set(r,0,0);else a.p.rotation.set(0,0,r);
+  if(a.tab){a.tab.rotation.set(up?Math.PI:0,0,0);a.tab.position.y=(up?0.25:0)*IN;}}
+ document.getElementById('abtn').textContent=up?'Apron: UP (towing) → lower':'Apron: DOWN (parked) → raise';}
+function toggleApron(){setApron(!apronUp);}
+function toggleHitch(){setHitch(!hitchUp);setApron(hitchUp);}
+window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;window.toggleApron=toggleApron;
+const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));{const ap=q.get('apron');setApron(ap?/^(up|1|raised)$/.test(ap):hitchUp);}setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
 window.__ready=true;
