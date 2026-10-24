@@ -5,8 +5,8 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #hint{font-size:12px;color:#444;margin-top:4px}</style></head><body>
 <div id="ui"><div id="title"></div>
 
-<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button>
-<button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button><button id="abtn" onclick="toggleApron()">Apron</button>
+<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('nestin')">Nests inside</button><button onclick="setView('nestsec')">Nest section</button>
+<button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button><button id="abtn" onclick="toggleApron()">Apron</button><button id="tbtn" onclick="toggleTray()">Egg tray</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. Units: 1 grid square = 1 ft.</div></div>
 <script>
 console.warn('Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation'),
@@ -1549,7 +1549,15 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  box(g,0,72,3.5,7,3.5,92.5,mat.pt);box(g,0,72,7,7.5,0,96,mat.wood);
  const t2=mat.t111.clone();t2.side=THREE.DoubleSide;const W=(p)=>quad(g,p,t2);const V=12;
  W([[0,7.5,-0.6],[17,7.5,-0.6],[17,top(0)-V,-0.6],[0,top(0)-V,-0.6]]);W([[55,7.5,-0.6],[72,7.5,-0.6],[72,top(0)-V,-0.6],[55,top(0)-V,-0.6]]);W([[0,7.5,96.6],[0,top(96)-V,96.6],[72,top(96)-V,96.6],[72,7.5,96.6]]);
- W([[-0.6,7.5,0],[-0.6,top(0)-V,0],[-0.6,top(96)-V,96],[-0.6,7.5,96]]);W([[72.6,7.5,96],[72.6,top(96)-V,96],[72.6,top(0)-V,0],[72.6,7.5,0]]);
+ // ROLLAWAY NEST GEOMETRY (shared): row of 3 boxes inside on the end wall (x=0), z NZ0..NZ0+3*NBW; floor slopes NSL deg DOWN toward the wall
+ const NZ0=24,NBW=15.17,NT=Math.tan(11*Math.PI/180),NY0=19.5,yf=(x)=>NY0+(x-3.5)*NT,NSLOT=2.75; // floor top at inside wall face (x=3.5) = 19.5" AGL
+ const NL=[NZ0+0.375,NZ0+NBW,NZ0+2*NBW,NZ0+3*NBW-0.375]; // divider/stud centre lines
+ const NS=[0,1,2].map(i=>[NL[i]+0.75,NL[i+1]-0.75]); // egg-slot z ranges (between end-wall studs)
+ const ys0=yf(-0.6)-0.8,ys1=yf(-0.6)+NSLOT; // slot cut in T1-11 (chute board passes through the bottom of it)
+ {const Ws=(y0,y1,za,zb)=>W([[-0.6,y0,za],[-0.6,y1,za],[-0.6,y1,zb],[-0.6,y0,zb]]);
+  Ws(7.5,ys0,0,96);W([[-0.6,ys1,0],[-0.6,top(0)-V,0],[-0.6,top(96)-V,96],[-0.6,ys1,96]]);
+  let za=0;for(const [a,b] of NS){Ws(ys0,ys1,za,a);za=b;}Ws(ys0,ys1,za,96);}
+ W([[72.6,7.5,96],[72.6,top(96)-V,96],[72.6,top(0)-V,0],[72.6,7.5,0]]);
  // 12" HC vent band on all 4 coop walls
  meshPanel(g,[0,top(0)-V,-0.7],[72,0,0],[0,V,0],2);meshPanel(g,[0,top(96)-V,96.7],[72,0,0],[0,V,0],2);
  meshPanel(g,[-0.7,top(0)-V,0],[0,-24,96],[0,V,0],2);meshPanel(g,[72.7,top(0)-V,0],[0,-24,96],[0,V,0],2);
@@ -1560,19 +1568,81 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  box(g,18.5,53.5,7.5,74.5,-1.4,-0.6,mat.trim);const wd=box(g,19,53,8,74,-2.2,-1.4,mat.t111);for(const y of [12,66])box(g,19.5,52.5,y,y+3.5,-3.2,-2.2,mat.pt);const zb=box(g,0,40,0,3.5,-3.2,-2.2,mat.pt);zb.position.set(36*IN,40.7*IN,-2.7*IN);zb.rotation.z=Math.atan2(50,30);zb.scale.x=1.45;
  for(const y of [14,40,66])box(g,53,57,y,y+1.5,-3.4,-2.2,M(0x222222));box(g,16,19,42,46,-3.4,-2.2,mat.galv);box(g,10,60,top(0)-9,top(0)-4,-1.8,-0.6,M(0x333333));
  box(g,72.6,73.6,10,25,40,53,M(0x777777));box(g,73.6,83,0,5,40,54,mat.ramp);
- // ONE ROW, ONE PROFILE: 3 nest boxes + 1 feed box, each 15.2w x 14d x 16h outside, floor 19.5" AGL, sloped lids hinged at the wall (top ~36.5")
- const Z0=18,BW=15.17;
- for(let i=0;i<4;i++){const z0=Z0+i*BW;if(i<3)box(g,-14,0,19.5,35.5,z0,z0+BW,mat.nest);else{box(g,-14,-13.25,19.5,35.5,z0,z0+BW,mat.nest);box(g,-14,0,19.5,35.5,z0+BW-0.75,z0+BW,mat.nest);box(g,-14,0,19.5,35.5,z0,z0+0.75,mat.nest);}box(g,-14.6,-14,31,33,z0+6.5,z0+8.5,mat.galv);
-  const hp=new THREE.Group();hp.position.set(0.5*IN,36.5*IN,(z0+BW/2)*IN);hp.rotation.z=(i===3)?-1.25:0.12;g.add(hp);
+ // ROLLAWAY NEST BOXES (inside) + EXTERIOR EGG TRAY + exterior feed bay.  All inches.
+ // Boxes: 3 x 15.17w x 18d, inside the coop against the end wall (studs x 0..3.5, T1-11 at x=-0.6), front at x=21.5.
+ // Floor (3/4 ply) slopes 11 deg DOWN toward the wall: 19.5" AGL at the wall, 23.0" at the front. Green turf pad on the floor.
+ // 4" front lip, 1x4 landing board, sloped (24 deg) hinged + latched tops for clean-out from inside. Fixed baffle 3.5" off the wall,
+ // 3" above the pad. Egg rolls under the baffle, through a 2-3/4" slot in the wall, onto a padded exterior tray (5-3/4" clear depth)
+ // with its own metal lid hinged at the wall. Tray lid only covers the tray: the slot is too small for a hen and the baffle blocks the box side.
+ const prism=(par,pts,z0,z1,m)=>{const sh=new THREE.Shape();sh.moveTo(pts[0][0]*IN,pts[0][1]*IN);for(const p of pts.slice(1))sh.lineTo(p[0]*IN,p[1]*IN);sh.closePath();
+  const ms=new THREE.Mesh(new THREE.ExtrudeGeometry(sh,{depth:(z1-z0)*IN,bevelEnabled:false}),m);ms.position.z=z0*IN;ms.castShadow=ms.receiveShadow=true;par.add(ms);return ms;};
+ const sl=(x0,x1,ytop,th,z0,z1,m,ang=Math.atan(NT))=>{const L=(x1-x0)/Math.cos(ang),xm=(x0+x1)/2;const b=box(g,0,L,0,th,z0,z1,m);
+  b.position.set(xm*IN,(ytop(xm)-th/2/Math.cos(ang))*IN,(z0+z1)/2*IN);b.rotation.z=ang;return b;}; // board whose top face follows ytop(x)
+ const NZ1=NZ0+3*NBW,XF=21.5,YTW=50,YTF=42,ytop=(x)=>YTW+(x-3.5)*(YTF-YTW)/(XF-3.5);
+ const turf=M(0x3f8f3a,{roughness:1}),pad=M(0xa9bccb,{roughness:1}),NDG=new THREE.Group(),NDI=new THREE.Group();DG.nestsec=NDG;DG.nestin=NDI;g.add(NDG,NDI);
+ // end-wall studs at the dividers (frame the slots) + flat 2x4 header over each slot (sloped with the floor)
+ for(const zc of NL)box(g,0,3.5,7.5,top(zc)-0.4,zc-0.75,zc+0.75,mat.pt);
+ for(const [a,b] of NS){prism(g,[[0,yf(0)+NSLOT],[3.5,yf(3.5)+NSLOT],[3.5,yf(3.5)+NSLOT+1.5],[0,yf(0)+NSLOT+1.5]],a,b,mat.pt);
+  sl(-1.4,3.5,yf,0.75,a,b,mat.ply);} // chute = floor continued through the wall, 0.8" drip lip past the T1-11
+ // floor + turf pad
+ sl(3.5,XF,yf,0.75,NZ0,NZ1,mat.ply);
+ for(const [a,b] of [[NL[0]+0.375,NL[1]-0.375],[NL[1]+0.375,NL[2]-0.375],[NL[2]+0.375,NL[3]-0.375]]){sl(3.6,XF-0.1,(x)=>yf(x)+0.4,0.4,a+0.05,b-0.05,turf);
+  // fixed baffle (3/4 ply) 3.5" off the wall, bottom 3" above the pad
+  prism(g,[[7,yf(7)+3.4],[7.75,yf(7.75)+3.4],[7.75,ytop(7.75)],[7,ytop(7)]],a,b,mat.ply);}
+ // side panels / dividers (sloped top + bottom)
+ for(let k=0;k<4;k++){const zc=NL[k];prism(g,[[3.5,yf(3.5)],[XF,yf(XF)],[XF,YTF],[3.5,YTW]],zc-0.375,zc+0.375,mat.nest);}
+ // front: 4" lip board (covers the frame), header, landing board on 3 brackets
+ box(g,XF,XF+0.75,yf(XF)-3,yf(XF)+4,NZ0,NZ1,mat.nest);box(g,XF,XF+0.75,YTF-3.5,YTF,NZ0,NZ1,mat.nest);
+ box(g,XF+0.75,XF+5.5,yf(XF)-0.75,yf(XF),NZ0,NZ1,mat.pt);
+ for(const zc of NL)prism(g,[[XF+0.75,yf(XF)-0.75],[XF+4.5,yf(XF)-0.75],[XF+0.75,yf(XF)-4.5]],zc-0.75,zc+0.75,mat.pt);
+ // support: 2x4 ledger lagged to the studs under the floor + 2x4 front legs to the coop floor
+ prism(g,[[3.5,yf(3.5)-4.25],[5,yf(3.5)-4.25],[5,yf(5)-0.76],[3.5,yf(3.5)-0.76]],NZ0,NZ1,mat.pt);
+ for(const zc of [NL[0]+0.375,NL[1],NL[2],NL[3]-0.375])prism(g,[[XF-3.5,7.5],[XF,7.5],[XF,yf(XF)-0.76],[XF-3.5,yf(XF-3.5)-0.76]],zc-0.75,zc+0.75,mat.pt);
+ // hinged, latched clean-out tops (one per box), hinged at the wall
+ const NLID=[];g.userData.NLID=NLID;const lang=Math.atan2(YTW-YTF,XF-3.5);
+ for(const [a,b] of [[NL[0]-0.375,NL[1]],[NL[1],NL[2]],[NL[2],NL[3]+0.375]]){const hp=new THREE.Group();hp.position.set(3.5*IN,YTW*IN,(a+b)/2*IN);hp.rotation.z=-lang;g.add(hp);
+  const L=(XF+1.2-3.5)/Math.cos(lang);const lb=box(hp,0,L,0,0.75,-(b-a-0.2)/2,(b-a-0.2)/2,mat.t111);
+  for(const z of [-(b-a)/2+3,(b-a)/2-3])box(hp,0.3,4,0.75,0.9,z-0.6,z+0.6,mat.galv); // strap hinges
+  NLID.push(hp);}
+ for(const zc of [NL[0]/2+NL[1]/2,NL[1]/2+NL[2]/2,NL[2]/2+NL[3]/2]){box(g,XF+0.75,XF+1.25,YTF-2.2,YTF-0.6,zc-0.8,zc+0.8,mat.galv);} // hasp/latch on each top
+ // ---- EXTERIOR EGG TRAY (one continuous tray across the 3 slots) ----
+ const TX=-7.1,TY=16.25,lidY=24,lidX=-1.35;
+ const tA=Math.atan2(lidY-21.5,lidX-(TX+0.375)); // rise/run toward the wall
+ const ly=(x)=>lidY-(lidX-x)*(lidY-21.5)/(lidX-(TX+0.375));
+ box(g,TX,-0.6,TY,TY+0.75,NZ0,NZ1,mat.pt); // tray bottom (3/4 PT ply)
+ box(g,TX+0.75,-0.6,TY+0.75,TY+1.5,NZ0+0.75,NZ1-0.75,pad); // 3/4" foam pad
+ box(g,TX,TX+0.75,TY,ly(TX+0.75)-0.05,NZ0,NZ1,mat.pt); // front lip
+ box(g,TX+0.75,TX+1.15,TY+1.5,TY+4.5,NZ0+0.75,NZ1-0.75,pad); // padded lip face
+ for(const [a,b] of [[NZ0,NZ0+0.75],[NZ1-0.75,NZ1]])prism(g,[[-0.6,TY],[TX,TY],[TX,ly(TX)],[lidX,lidY],[-0.6,lidY]],a,b,mat.pt); // end caps follow the lid line
+ box(g,-1.35,-0.6,lidY-1.5,lidY,NZ0+0.75,NZ1-0.75,mat.pt); // 1x2 hinge cleat on the wall above the slots
+ box(g,-2.1,-0.6,TY-3.5,TY,NZ0,NZ1,mat.pt); // 2x4 ledger lagged to the end-wall studs
+ for(const zc of NL)prism(g,[[-2.1,TY],[TX+0.5,TY],[-2.1,TY-4.5]],zc-0.375,zc+0.375,mat.pt); // ply gussets under the tray at each stud
+ {const hp=new THREE.Group();hp.position.set(lidX*IN,lidY*IN,(NZ0+NZ1)/2*IN);g.add(hp);g.userData.TLID=hp;
+  const Lr=Math.hypot(lidX-TX,lidY-ly(TX))+1.0,W2=(NZ1-NZ0-0.2)/2;const lb=box(hp,-Lr,0,0,0.6,-W2,W2,mat.metal);
+  for(let z=-W2+3;z<=W2-2;z+=6)box(hp,-Lr,0,0.6,1.0,z-0.3,z+0.3,mat.metal); // ribs
+  box(hp,-Lr-0.2,-Lr+0.3,-1.2,0.6,-W2,W2,mat.metal); // drip edge
+  for(const z of [-W2+4,0,W2-4])box(hp,-1.6,0,0.6,0.8,z-1.2,z+1.2,mat.galv); // hinges
+  box(hp,-Lr+0.6,-Lr+1.6,1.0,2.0,-3,3,M(0x333333)); // pull handle
+  hp.userData.closed=tA;hp.userData.open=-1.35;hp.rotation.z=tA;}
+ // ---- FEED BAY (exterior, unchanged profile) beside the tray: 15.2w x 14d x 16h, floor 19.5", metal lid hinged at the wall ----
+ {const z0=NZ1,BW=NBW;box(g,-14,-13.25,19.5,35.5,z0,z0+BW,mat.nest);box(g,-14,0,19.5,35.5,z0+BW-0.75,z0+BW,mat.nest);box(g,-14,0,19.5,35.5,z0,z0+0.75,mat.nest);box(g,-14.6,-14,31,33,z0+6.5,z0+8.5,mat.galv);
+  const hp=new THREE.Group();hp.position.set(0.5*IN,36.5*IN,(z0+BW/2)*IN);hp.rotation.z=-1.25;g.add(hp);
   const lb=new THREE.Mesh(new THREE.BoxGeometry(17*IN,0.9*IN,(BW-0.3)*IN),mat.metal);lb.position.set(-8.5*IN,0,0);lb.castShadow=true;hp.add(lb);
-  for(let k=-6;k<=6;k+=4){const rb=new THREE.Mesh(new THREE.BoxGeometry(17*IN,0.5*IN,0.6*IN),mat.metal);rb.position.set(-8.5*IN,0.6*IN,k*IN);hp.add(rb);} // ribs down lid slope
- }
- {const zc=Z0+3.5*BW;box(g,-13,-1,19.5,33,zc-6,zc+6,M(0x3b3f45));cyl(5.2,1.2,-7,33.6,zc,M(0x2a2d31));} // Vittles Vault 25 lb upright in feed box, screw lid on top
- // cantilever: PT 2x4 bottom chords at each box side, bolted to sistered end-wall studs, with 2x4 hanger brace inside each side/divider from chord end up to the wall
- for(const z0 of [Z0,Z0+BW-1.75,Z0+2*BW-1.75,Z0+3*BW-1.75,Z0+4*BW-3.5]){box(g,-14,0,7.5,9,z0,z0+3.5,mat.pt);
-  const d=box(g,-14,14,0,1.5,z0+1,z0+2.5,mat.pt);const dx=13,dy=25;d.scale.x=Math.hypot(dx,dy)/28;d.position.set(-6.5*IN,21.5*IN,(z0+1.75)*IN);d.rotation.z=-Math.atan2(dy,dx);
-  for(const y of [8.25,33])box(g,0,0.8,y-0.4,y+0.4,z0+1.3,z0+2.2,mat.galv);}
- box(g,-14.6,-14,7.5,19.5,Z0,Z0+4*BW,t2);for(const z of [Z0-0.6,Z0+4*BW])box(g,-14.6,0,7.5,19.5,z,z+0.6,t2);box(g,-14,0,19,19.5,Z0,Z0+4*BW,t2);box(g,-14,0,9,9.5,Z0,Z0+4*BW,t2);
+  for(let k=-6;k<=6;k+=4){const rb=new THREE.Mesh(new THREE.BoxGeometry(17*IN,0.5*IN,0.6*IN),mat.metal);rb.position.set(-8.5*IN,0.6*IN,k*IN);hp.add(rb);}
+  const zc=z0+BW/2;box(g,-12.5,-1.5,19.5,33,zc-5.25,zc+5.25,M(0x3b3f45));cyl(5.2,1.2,-7,33.6,zc,M(0x2a2d31)); // Vittles Vault 25 lb upright, screw lid on top
+  // cantilever: 2 PT 2x4 bottom chords (one per bay side) bolted to sistered end-wall studs, 2x4 hanger brace inside each side
+  for(const [cz,bz] of [[z0,z0+0.75],[z0+BW-3.5,z0+BW-2.25]]){box(g,-14,0,7.5,9,cz,cz+3.5,mat.pt);box(g,0,3.5,7.5,top(cz+1.75)-0.4,cz+0.5,cz+2,mat.pt);
+   const d=box(g,-14,14,0,1.5,bz,bz+1.5,mat.pt);const dx=13,dy=25;d.scale.x=Math.hypot(dx,dy)/28;d.position.set(-6.5*IN,21.5*IN,(bz+0.75)*IN);d.rotation.z=-Math.atan2(dy,dx);
+   for(const y of [8.25,33])box(g,3.5,4.3,y-0.4,y+0.4,cz+1.3,cz+2.2,mat.galv);}
+  box(g,-14.6,-14,7.5,19.5,z0,z0+BW,t2);for(const z of [z0,z0+BW-0.6])box(g,-14.6,0,7.5,19.5,z,z+0.6,t2);box(g,-14,0,19,19.5,z0,z0+BW,t2);box(g,-14,0,9,9.5,z0,z0+BW,t2);}
+ // labels (overview) + close-up callouts
+ {const nl=(G2,t,x,y,z,sz)=>label({userData:{labels:G2}},t,x,y,z,sz);const zm=NZ0+1.5*NBW;
+  nl(NDG,'floor slopes 11° down to wall (19.5" → 23")',17,12,zm+8,0.3);nl(NDG,'turf pad',15,26.5,zm+8,0.3);
+  nl(NDG,'fixed baffle, 3" above pad',11,36,zm+8,0.3);nl(NDG,'2-3/4" egg slot thru wall',2,15.8,zm+6,0.3);
+  nl(NDG,'padded egg tray, 5-3/4" deep, ~4" lip',-8,8.2,zm+6,0.3);nl(NDG,'tray lid hinged at wall (covers tray only)',-6,30.5,zm+6,0.3);
+  nl(NDG,'hinged + latched clean-out top',14,53,zm+8,0.3);nl(NDG,'4" front lip + landing board',27,19,zm+8,0.3);
+  nl(NDI,'3 rollaway nest boxes (inside)',12,57,zm+4,0.45);nl(NDI,'hinged, latched tops (clean-out from inside)',12,55,NZ0+0.5*NBW,0.36);nl(NDI,'baffle hides the egg slot',14,33,NZ0+2.5*NBW,0.36);
+  nl(NDI,'4" lip + landing board',30,23,NZ0+NBW,0.36);nl(NDI,'turf pad, floor sloped 11° to wall',18,27,NZ0+0.5*NBW,0.36);nl(NDI,'2x4 legs + wall ledger',22,11,NZ0+NBW*2.6,0.36);}
  // PREDATOR CLOSURE: PT 2x4 cross sills at coop end (x=0) and coop/run line (x=68.5) close the 3.5" gap under the coop floor between skids;
  // 1/2" HC stapled across underside of coop floor framing -> under-coop void fully enclosed, not connected to run.
  box(g,0,3.5,0,3.5,3.5,92.5,mat.pt);box(g,68.5,72,0,3.5,3.5,92.5,mat.pt);meshPanel(g,[0,0.15,0],[72,0,0],[0,0,96],2);
@@ -1646,9 +1716,9 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  // solar
  const sp=new THREE.Mesh(new THREE.BoxGeometry(41.8*IN,1.4*IN,20.9*IN),mat.solar);sp.position.set(30*IN,(yr(16)+2.5)*IN,16*IN);sp.rotation.x=Math.atan2(24,96);sp.castShadow=true;g.add(sp);
  label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48);label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
- label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed box (top lid)',-14,44,71,0.8);label(g,'pop door + step',80,30,48,0.75);
+ label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed bay (outside, top lid)',-14,52,NZ0+3.5*NBW,0.8);label(g,'pop door + step',80,30,48,0.75);
  label(g,'rain barrel + nipples',120,52,82,0.8);
- label(g,'3 nest boxes',-14,34,36,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);label(g,'flip-up HC apron (run only, 7 strips + door strip)',130,-4,-16,0.75);
+ label(g,'3 rollaway nest boxes (inside)',12,58,NZ0+1.5*NBW,0.8);label(g,'Egg tray + lid (outside)',-12,6,NZ0+1.5*NBW,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);label(g,'flip-up HC apron (run only, 7 strips + door strip)',130,-4,-16,0.75);
  dim(g,[0,0,-24],[192,0,-24],"16'-0\"",[0,6,0]);dim(g,[208,0,0],[208,0,96],"8'-0\"",[0,6,0]);dim(g,[0,0,-14],[72,0,-14],"6' coop",[0,5,0]);dim(g,[-24,0,-6],[-24,84,-6],"7'-0\"",[-8,0,0]);
  return g;}
 // person 6' reference
@@ -1659,12 +1729,17 @@ function person(){const g=new THREE.Group();const c=(r,h,y,m,x=0)=>{const k=new 
  g.position.set(-30*IN,0,-30*IN);return g;}
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",-30,80,-30,0.8);scene.add(plab.userData.labels);
 const G=buildG();scene.add(G);
-document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over nest/feed row';
-const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
-let showLabels=true,detailView=false,hitchUp=false,apronUp=false,curView='nest3q';
+document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over egg tray + feed bay';
+const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-4.6,0.9,9.6],[0.4,0.9,4.6]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-8.8,3.4,-0.9],[-0.4,1.9,4.1]],tray:[[-6.6,3.6,0.2],[-0.2,2.0,4.0]],nestin:[[8.6,5.2,0.0],[1.1,2.55,4.1]],nestsec:[[0.95,2.75,-1.4],[0.75,2.45,3.9]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+let showLabels=true,detailView=false,hitchUp=false,apronUp=false,trayOpen=false,curView='nest3q';
+// cutaway views: section through the middle nest box (keep z > box centre) / inside view (drop front wall + roof)
+renderer.localClippingEnabled=true;const CLIP={nestsec:[new THREE.Plane(new THREE.Vector3(0,0,1),-(24+1.5*15.17)*IN)],nestin:[new THREE.Plane(new THREE.Vector3(0,0,1),-4*IN),new THREE.Plane(new THREE.Vector3(0,-1,0),56*IN),new THREE.Plane(new THREE.Vector3(-1,0,0),62*IN)]};
+function applyClip(v){const pl=CLIP[v]||null;G.traverse(o=>{if(!o.material||o.isSprite||o.isLine)return;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){if(m.userData.side0===undefined)m.userData.side0=m.side;m.clippingPlanes=pl;m.clipShadows=!!pl;m.side=pl?THREE.DoubleSide:m.userData.side0;m.needsUpdate=true;}});}
+function setTray(open){trayOpen=open;const L=G.userData.TLID;L.rotation.z=open?L.userData.open:L.userData.closed;const b=document.getElementById('tbtn');if(b)b.textContent=open?'Egg tray: OPEN → close':'Egg tray: closed → open';}
+function toggleTray(){setTray(!trayOpen);}
 function showGhost(){const T=G.userData.GT.userData,on=hitchUp||curView==='hitch';T.ghost.visible=T.chain.visible=on;}
 function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lab.visible=showLabels&&detailView==='hitch';}
-function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron')?v:false;curView=v;showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
+function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron'||v==='nestsec'||v==='nestin')?v:false;curView=v;applyClip(v);showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
 function toggleLabels(){showLabels=!showLabels;applyLabels();}
 scene.add(G.userData.GT);
 function setHitch(up){hitchUp=up;const BP=G.userData.BP,GT=G.userData.GT;
@@ -1702,8 +1777,8 @@ function setApron(up){apronUp=up;for(const a of G.userData.AP){const r=up?a.up:a
  document.getElementById('abtn').textContent=up?'Apron: UP (towing) → lower':'Apron: DOWN (parked) → raise';}
 function toggleApron(){setApron(!apronUp);}
 function toggleHitch(){setHitch(!hitchUp);setApron(hitchUp);}
-window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;window.toggleApron=toggleApron;
-const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));{const ap=q.get('apron');setApron(ap?/^(up|1|raised)$/.test(ap):hitchUp);}setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
+window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;window.toggleApron=toggleApron;window.toggleTray=toggleTray;
+const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));{const ap=q.get('apron');setApron(ap?/^(up|1|raised)$/.test(ap):hitchUp);}setTray(/^(open|up|1)$/.test(q.get('tray')||''));setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
 window.__ready=true;
