@@ -5,7 +5,7 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #hint{font-size:12px;color:#444;margin-top:4px}</style></head><body>
 <div id="ui"><div id="title"></div>
 
-<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Hitch</button><button onclick="setView('runner')">Skid runner</button>
+<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button>
 <button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. Units: 1 grid square = 1 ft.</div></div>
 <script>
@@ -1509,40 +1509,34 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
    box(g,Lx,Lx+0.19,2,3.5,z+0.25,z+3.25,ws);
    for(const x of [Lx-30,Lx-18,Lx-5])cyl(0.35,0.1,x,x>Lx-10?0.19+2*(x-(Lx-10))/10+0.02:0.21,z+1.75,mat.galv);}}
  box(g,188.5,Lx,0,3.5,3.5,92.5,mat.pt); // PT 4x4 front sill between skids (predator seal at run front)
- // ---------- CAT 1 THREE-POINT HITCH A-FRAME (front / hitch end, x=192) ----------
- // Steel: 3x3x3/16 sq tube cross beam + A-frame legs, 2x2x3/16 sq tube back-braces, 1/2" plate lower-pin ears + top-link clevis.
- // Lower pins 7/8" Cat 1, 26" shoulder spread (ear outer faces z=35 / z=61), 19" AGL parked. Top-link 3/4" pin, 18" above the lower pin line (37" AGL).
- const HS=M(0x2f5f8f,{metalness:0.55,roughness:0.45}); // painted steel
- const HP={xl:197.5,yl:19,zl:[35,61],yt:37,xt:198,spread:26,mast:18};g.userData.HP=HP;
- const bar=(a,b,w,m,par=g)=>{const A=new THREE.Vector3(...a).multiplyScalar(IN),B=new THREE.Vector3(...b).multiplyScalar(IN),d=B.clone().sub(A);
-  const mm=new THREE.Mesh(new THREE.BoxGeometry(w*IN,d.length(),w*IN),m);mm.position.copy(A).add(B).multiplyScalar(0.5);mm.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());mm.castShadow=true;par.add(mm);return mm;};
- box(g,192,195,2.5,5.5,-0.5,96.5,HS); // front cross beam 3x3x3/16 x 97", across both skid noses
- box(g,182,185,0.5,3.5,3.5,92.5,HS); // rear tie 3x3x3/16 between skids, just inside the run front (brace feet)
- for(const z of [0,92.5])for(const zz of [z-0.19,z+3.5]){box(g,181,195,2,5.5,zz,zz+0.19,HS);} // 3/16 side straps each side of skid+rim, tie both tubes to the skid
- for(const z of [1.75,94.25])for(const x of [183.5,189.5])cyl(0.3,4.2,x,x<186?2.5:3.2,z,mat.galv,Math.PI/2); // 1/2" thru-bolts
- // lower-pin ears: 1/2" plates welded to cross beam, gusseted; 7/8" pins point outboard with linch-pin holes
- for(const [zo,s] of [[35,1],[61,-1]]){const z0=s>0?zo:zo-0.5;box(g,192,200,2.5,23,z0,z0+0.5,HS);
-  bar([194,6,zo+s*1.5],[199,21,zo+s*1.5],0.5,HS); // inner gusset
-  cyl(0.4375,4.5,HP.xl,HP.yl,zo-s*2.25,mat.galv,Math.PI/2);cyl(0.7,0.4,HP.xl,HP.yl,zo-s*0.2,mat.galv,Math.PI/2); // 7/8" pin + weld collar
-  cyl(0.12,1.4,HP.xl,HP.yl,zo-s*3.9,M(0xd02020));}
- // A-frame legs (3x3x3/16) from the ears/cross beam up to the mast; apex cap; top-link clevis (two 1/2" plates, 1.8" gap, 3/4" pin hole at 37" AGL)
- bar([196,5.5,37],[197,33,45.6],3,HS);bar([196,5.5,59],[197,33,50.4],3,HS);
- box(g,193.5,200,32,34,43,53,HS);
- for(const z of [46.6,48.9]){box(g,194.5,201,31,40,z,z+0.5,HS);}
- cyl(0.375,4.4,HP.xt,HP.yt,48,mat.galv,Math.PI/2);for(const z of [46.6,49.4])cyl(0.5,0.15,HP.xt,HP.yt,z+(z<48?-0.1:0.1),mat.galv,Math.PI/2);
- // back-braces (2x2x3/16): apex -> rear tie, through the run's front HC (HC patched/framed around them); keep clear of the run door (z=0 side, x 154-180)
- bar([195,32,46],[184,3.5,38],2,HS);bar([195,32,50],[184,3.5,58],2,HS);
- bar([196,6,36],[196,6,60],2,HS); // knee tie between leg feet (on top of cross beam)
- // close-up callouts (Hitch / Skid-runner views)
+ // ---------- CHAIN BRIDLE (front / hitch end, x=192) ----------
+ // PT 6x6 (5.5x5.5) x 8' beam butted to both skid noses at skid level (y 2..7.5, x 192.5..198), strapped to each skid with 1/4x3 steel straps
+ // both sides + 1/2" carriage bolts. Forged 3/4" galv shoulder eye bolts through the beam 8" in from each end (80" apart), nut+washer
+ // counterbored in the back face. 3/8" grade-70 transport chain (66" each) runs in a V to one shackle on a ghosted drawbar across the 3-pt lower arms.
+ const ST=M(0x6d747a,{metalness:0.6,roughness:0.45}); // galv/plain steel
+ const BP={x0:192.5,x1:198,y0:2,y1:7.5,ey:4.75,ez:[8,88],eye:[201.2],chain:66};g.userData.BP=BP;
+ box(g,BP.x0,BP.x1,BP.y0,BP.y1,0,96,mat.pt); // PT 6x6 x 96"
+ for(const z of [0,92.5])for(const zz of [z-0.25,z+3.5]){box(g,184,BP.x1,2,7,zz,zz+0.25,ST);} // 1/4x3... straps (x 184..198) each side of each skid, lapping skid + beam end
+ for(const z of [1.75,94.25])for(const [x,y] of [[186,2.6],[190,3.2],[195.25,4.75]])cyl(0.3,4.6,x,y,z,mat.galv,Math.PI/2); // 1/2" carriage bolts thru strap+skid / strap+beam
+ for(const z of BP.ez){cyl(0.375,7.6,197.6,BP.ey,z,mat.galv,0,Math.PI/2); // 3/4" eye-bolt shank thru 6x6
+  cyl(0.85,0.4,198.2,BP.ey,z,mat.galv,0,Math.PI/2); // forged shoulder + washer front
+  const t=new THREE.Mesh(new THREE.TorusGeometry(1.15*IN,0.38*IN,10,20),mat.galv);t.position.set(199.9*IN,BP.ey*IN,z*IN);t.castShadow=true;g.add(t); // eye (vertical plane)
+  cyl(1.3,0.19,193.0,BP.ey,z,mat.galv,0,Math.PI/2);cyl(0.65,0.65,193.5,BP.ey,z,mat.galv,0,Math.PI/2);} // washer+nut (counterbored behind)
+ // close-up callouts (Bridle / Skid-runner views)
  const DG={hitch:new THREE.Group(),runner:new THREE.Group()};g.userData.DG=DG;g.add(DG.hitch,DG.runner);let dk='hitch';const dl=(t,x,y,z,sz=0.42)=>label({userData:{labels:DG[dk]}},t,x,y,z,sz);
- dl('Cat 1 A-frame: 3x3x3/16 steel sq tube',212,44,30);dl('top-link clevis, 3/4" pin, 18" above lower pins',214,40,30,0.38);
- dl('7/8" lower pin (L)',206,22,26,0.38);dl('7/8" lower pin (R)',206,22,70,0.38);dl('26" lower-pin spread, 19" AGL parked',212,11,48,0.38);
- dl('3x3x3/16 cross beam + 3/16 side straps to skids',200,-3,10,0.36);dl('2x2x3/16 back-braces to rear tie (inside run front)',178,30,-8,0.36);
- dk='runner';dl('sled-nose taper 10" x 2" (both skids)',198,-1.5,-3,0.22);dl('3/16x3 steel wear strap, lagged, wraps nose',170,-2,-3,0.22);dl('optional 3/8" UHMW strip full length',164,-3.5,-3,0.22);dl('hitch cross beam + side straps, 1/2" thru-bolts',194,9,-3,0.22);dl('rear bevel 8" x 2" (backing up)',6,-3,-8,0.36);
- // ghost tractor links (Hitch view only), placed in world coords by setHitch()
- {const gm=new THREE.MeshStandardMaterial({color:0xff7a1a,transparent:true,opacity:0.35,depthWrite:false});const GT=new THREE.Group();g.userData.GT=GT;GT.userData.links=[];
-  for(let i=0;i<3;i++){const m=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1,14),gm);GT.add(m);GT.userData.links.push(m);}
-  label({userData:{labels:GT}},'Kubota L4200 lower links + top link (ghost)',226,30,48,0.4);GT.userData.lbl=GT.children[GT.children.length-1];}
+ dl('PT 6x6 x 8\' bridle beam at skid level',198,16,36,0.4);
+ dl('3/4" forged galv eye bolt (L), nut+washer behind',204,12,4,0.36);dl('3/4" forged galv eye bolt (R)',206,11,100,0.36);
+ dl('1/4x3 steel strap brackets + 1/2" carriage bolts',196,-4,-6,0.34);dl('nothing passes through run mesh',180,26,48,0.34);
+ dk='runner';dl('sled-nose taper 10" x 2" (both skids)',198,-1.5,-3,0.22);dl('3/16x3 steel wear strap, lagged, wraps nose',170,-2,-3,0.22);dl('optional 3/8" UHMW strip full length',164,-3.5,-3,0.22);dl('6x6 bridle beam + 1/4x3 strap brackets, 1/2" bolts',194,11,-3,0.22);dl('rear bevel 8" x 2" (backing up)',6,-3,-8,0.36);
+ // chains + hardware + ghost tractor drawbar/arms: world coords, rebuilt by setHitch()
+ {const GT=new THREE.Group();g.userData.GT=GT;const gm=new THREE.MeshStandardMaterial({color:0xff7a1a,transparent:true,opacity:0.35,depthWrite:false});
+  const GH=new THREE.Group();GT.add(GH);GT.userData.ghost=GH;GT.userData.gm=gm;
+  const CH=new THREE.Group();GT.add(CH);GT.userData.chain=CH;GT.userData.cm=M(0x9aa1a7,{metalness:0.75,roughness:0.35});
+  const LB=new THREE.Group();GT.add(LB);GT.userData.lab=LB;
+  label({userData:{labels:LB}},'Kubota L4200 3-pt lower arms + drawbar (ghost)',262,34,48,0.4);
+  label({userData:{labels:LB}},'3/8" grade-70 chain, 66" each, V bridle',228,24,20,0.36);
+  label({userData:{labels:LB}},'5/8" screw-pin shackle on drawbar; clevis grab hooks',258,20,62,0.34);
+  label({userData:{labels:LB}},'3/8" screw-pin shackles at eye bolts',212,4,-6,0.32);}
  // rim
  box(g,0,Lx,3.5,5,0,3.5,mat.pt);box(g,0,Lx,3.5,5,92.5,96,mat.pt);
  // posts
@@ -1622,7 +1616,7 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48);label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
  label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed box (top lid)',-14,44,71,0.8);label(g,'pop door + step',80,30,48,0.75);
  label(g,'rain barrel + nipples',120,52,82,0.8);
- label(g,'3 nest boxes',-14,34,36,0.8);label(g,'Cat 1 3-pt hitch A-frame (steel), slides on skids',214,56,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);
+ label(g,'3 nest boxes',-14,34,36,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);
  dim(g,[0,0,-24],[192,0,-24],"16'-0\"",[0,6,0]);dim(g,[208,0,0],[208,0,96],"8'-0\"",[0,6,0]);dim(g,[0,0,-14],[72,0,-14],"6' coop",[0,5,0]);dim(g,[-24,0,-6],[-24,84,-6],"7'-0\"",[-8,0,0]);
  return g;}
 // person 6' reference
@@ -1634,20 +1628,43 @@ function person(){const g=new THREE.Group();const c=(r,h,y,m,x=0)=>{const k=new 
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",-30,80,-30,0.8);scene.add(plab.userData.labels);
 const G=buildG();scene.add(G);
 document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over nest/feed row';
-const VIEWS={hitch:[[23.2,4.6,-2.6],[16.6,1.9,3.6]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
-let showLabels=true,detailView=false,hitchUp=false;
-function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lbl.visible=showLabels;}
-function setView(v){const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner')?v:false;G.userData.GT.visible=(v==='hitch');applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
+const VIEWS={hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-3.2,0.75,10.8],[1.2,0.15,5.5]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-12,4.2,-3],[0,3.2,4]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+let showLabels=true,detailView=false,hitchUp=false,curView='nest3q';
+function showGhost(){const T=G.userData.GT.userData,on=hitchUp||curView==='hitch';T.ghost.visible=T.chain.visible=on;}
+function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lab.visible=showLabels&&detailView==='hitch';}
+function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner')?v:false;curView=v;showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
 function toggleLabels(){showLabels=!showLabels;applyLabels();}
 scene.add(G.userData.GT);
-function setHitch(up){hitchUp=up;const HP=G.userData.HP;
- // LIFTED: coop pivots about the rear skid bottoms (end of the rear bevel, x=8",y=0) so the front lower-pin line rises 6"
- const px=8*IN,phi=up?Math.asin(6/(HP.xl-8)):0;G.rotation.z=phi;G.position.set(px-px*Math.cos(phi),-px*Math.sin(phi),0);G.updateMatrixWorld(true);
- const W=(x,y,z)=>G.localToWorld(new THREE.Vector3(x*IN,y*IN,z*IN));
- const L=G.userData.GT.userData.links,tr=(x,y,z)=>new THREE.Vector3(x*IN,y*IN,z*IN);
- const seg=(m,A,B,r)=>{const d=B.clone().sub(A);m.position.copy(A).add(B).multiplyScalar(0.5);m.scale.set(r*IN,d.length(),r*IN);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());};
- seg(L[0],W(HP.xl,HP.yl,HP.zl[0]-1.2),tr(232,16,38),1.1);seg(L[1],W(HP.xl,HP.yl,HP.zl[1]+1.2),tr(232,16,58),1.1);seg(L[2],W(HP.xt,HP.yt,48),tr(230,40,48),0.9);
- document.getElementById('hbtn').textContent=up?'Hitch: LIFTED (towing) → lower':'Hitch: DOWN (parked on skids) → lift';}
+function setHitch(up){hitchUp=up;const BP=G.userData.BP,GT=G.userData.GT;
+ // LIFTED: coop pivots about the rear skid bottoms (end of the rear bevel, x=8",y=0) so the beam/front rises 6"
+ const px=8*IN,phi=up?Math.asin(6/(BP.x1-8)):0;G.rotation.z=phi;G.position.set(px-px*Math.cos(phi),-px*Math.sin(phi),0);G.updateMatrixWorld(true);
+ const V=(x,y,z)=>new THREE.Vector3(x*IN,y*IN,z*IN),W=(x,y,z)=>G.localToWorld(V(x,y,z));
+ const E=BP.ez.map(z=>W(201.2,BP.ey,z)); // shackle pin points at the eyes
+ // drawbar clevis point C: fixed tractor x (set so chains are taut when lifted at 24" drawbar height); down: arms lowered to 8"
+ const Eu=[V(0,0,0)];{const ph=Math.asin(6/(BP.x1-8)),c=Math.cos(ph),s_=Math.sin(ph),p=8;const ex=p-p*c+201.2*c-BP.ey*s_,ey=-p*s_+201.2*s_+BP.ey*c;
+  const dz=48-1.2-BP.ez[0],dy=24.2-ey;GT.userData.cx=ex+1.2+Math.sqrt(BP.chain*BP.chain-dz*dz-dy*dy)+2.7;}
+ const cx=GT.userData.cx,cy=up?24:8,C=V(cx,cy,48);
+ // ghost: lower arms, drawbar, clevis plate
+ const GH=GT.userData.ghost,gm=GT.userData.gm;while(GH.children.length)GH.remove(GH.children[0]);
+ const rod=(A,B,r,m,par)=>{const d=B.clone().sub(A);const mm=new THREE.Mesh(new THREE.CylinderGeometry(r*IN,r*IN,d.length(),12),m);mm.position.copy(A).add(B).multiplyScalar(0.5);mm.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());par.add(mm);return mm;};
+ rod(V(cx+1,cy,33),V(cx+1,cy,63),1,gm,GH); // drawbar across lower-arm ends (26" spread)
+ for(const z of [35,61])rod(V(cx+1,cy,z),V(cx+34,up?18:14,z+(z<48?2:-2)),1.2,gm,GH); // lower arms back toward tractor
+ {const pl=new THREE.Mesh(new THREE.BoxGeometry(3*IN,0.6*IN,3*IN),gm);pl.position.set((cx+0.5)*IN,(cy+1.3)*IN,48*IN);GH.add(pl);} // drawbar clevis
+ // chains (3/8" G70: ~1.1" pitch), hooks, shackles
+ const CH=GT.userData.chain,cm=GT.userData.cm;while(CH.children.length)CH.remove(CH.children[0]);
+ const lg=new THREE.TorusGeometry(0.42*IN,0.19*IN,6,12);
+ const sh=(P,r,rotY)=>{const t=new THREE.Mesh(new THREE.TorusGeometry(r*IN,0.22*IN,8,14,Math.PI*1.2),mat.galv);t.position.copy(P);t.rotation.set(0,rotY,Math.PI/2);CH.add(t);
+  const pin=new THREE.Mesh(new THREE.CylinderGeometry(0.2*IN,0.2*IN,r*2.6*IN,8),mat.galv);pin.position.copy(P);pin.rotation.z=Math.PI/2;CH.add(pin);};
+ const Cs=V(cx-1.2,cy+0.2,48);sh(Cs,0.9,0); // 5/8" shackle at drawbar
+ for(const e of E){sh(e.clone().add(V(-0.3,0,0)),0.7,Math.PI/2); // 3/8" shackle in eye
+  const A=e.clone().add(V(1.2,0,0)),B=Cs.clone().add(V(-1.5,0,(e.z/IN<48?-1:1)*1.2));
+  {const hk=new THREE.Mesh(new THREE.BoxGeometry(1.8*IN,1.2*IN,0.6*IN),mat.galv);hk.position.copy(B);CH.add(hk);} // clevis grab hook
+  const S=A.distanceTo(B),L=BP.chain*IN,sag=(!up&&L>S)?Math.sqrt(3*S*(L-S)/8):0,n=Math.round(BP.chain/1.1);
+  const pts=[];for(let i=0;i<=n;i++){const t=i/n;const P=A.clone().lerp(B,t);P.y=Math.max(0.4*IN,P.y-4*sag*t*(1-t));pts.push(P);}
+  for(let i=0;i<n;i++){const P=pts[i].clone().add(pts[i+1]).multiplyScalar(0.5),d=pts[i+1].clone().sub(pts[i]).normalize();
+   const m=new THREE.Mesh(lg,cm);m.scale.set(1,1.6,1);m.position.copy(P);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d);
+   if(i%2)m.rotateY(Math.PI/2);m.castShadow=true;CH.add(m);}}
+ showGhost();document.getElementById('hbtn').textContent=up?'Hitch: LIFTED (towing) → lower':'Hitch: DOWN (parked) → lift';}
 function toggleHitch(){setHitch(!hitchUp);}
 window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;
 const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
