@@ -1680,7 +1680,7 @@ function setDoors(o){doorsOpen=o;for(const d of DOORS)d.rotation.y=o?d.userData.
 function setApron(up){apronUp=up;for(const a of AP){const r=up?a.up:a.down;if(a.ax==='x')a.p.rotation.set(r,0,0);else a.p.rotation.set(0,0,r);}btxt('abtn',up?'Apron: UP (towing)':'Apron: DOWN (parked)');}
 window.setView=setView;window.toggleLabels=()=>{showLabels=!showLabels;applyLabels();};window.toggleTray=()=>setTray(!trayOpen);window.toggleFeed=()=>setFeed(!feedOpen);window.toggleDoors=()=>setDoors(!doorsOpen);window.toggleApron=()=>setApron(!apronUp);
 const q=new URLSearchParams(location.search);const on=(k)=>/^(open|up|1|yes|raised)$/.test(q.get(k)||'');
-setTray(on('tray'));setFeed(on('feed'));setDoors(on('doors'));setApron(on('apron'));setView(q.get('view')||'overview');{const lp=q.get('labels');if(lp==='0'||lp==='off'||(lp!=='1'&&lp!=='on'&&innerWidth<700))window.toggleLabels();} // labels off by default on phones
+setTray(on('tray'));setFeed(on('feed'));setDoors(on('doors'));setApron(on('apron'));setView(q.get('view')||(innerWidth<700?'mobile':'overview'));{const lp=q.get('labels');if(lp==='0'||lp==='off'||(lp!=='1'&&lp!=='on'&&innerWidth<700))window.toggleLabels();} // labels off by default on phones
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
 window.__ready=true;
