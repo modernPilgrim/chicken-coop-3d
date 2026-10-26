@@ -1536,6 +1536,8 @@ function buildCoop(G0,cg,o){
  skin(g,'z',60.6,-0.6,72.6,B,(z)=>top(z)-V,hRun,t2);
  meshPanel(g,[0,top(0)-V,-0.7],[60,0,0],[0,V+PT,0],2);meshPanel(g,[0,top(72)-V,72.7],[60,0,0],[0,V+PT,0],2);
  meshPanel(g,[-0.7,top(0)-V,0],[0,-18,72],[0,V,0],2);meshPanel(g,[60.7,top(0)-V,0],[0,-18,72],[0,V,0],2);
+ // gable-end slots between the plate line and the metal (rafter + purlin depth) — HC so nothing gets in over the end walls
+ meshPanel(g,[-0.75,top(0),0],[0,-18,72],[0,PT,0],1);meshPanel(g,[60.75,top(0),0],[0,-18,72],[0,PT,0],1);
  // corner trim
  for(const [x0,x1,z0,z1,zt] of [[-1.35,-0.6,-1.35,3],[57,61.35,-1.35,-0.6],[-1.35,-0.6,69,73.35],[57,61.35,72.6,73.35]].map(a=>[...a,a[2]<0?0:72]))box(g,x0,x1,B,top(zt)-V,z0,z1,mat.trim);
  // ---------- WALK-IN DOOR 28 x 60 (framed T1-11, Z-brace, 3 T-hinges, hasp + spring snap) ----------
@@ -1646,6 +1648,66 @@ function glue(o){const {g,VIEWS}=o;const TLID=o.TLID,FLID=o.FLID,DOORS=o.DOORS||
 function person(at){const p=new THREE.Group();const c=(r,h,y,m,z)=>{const k=new THREE.Mesh(new THREE.CylinderGeometry(r*IN,r*IN,h*IN,14),m);k.position.set(0,y*IN,z*IN);k.castShadow=true;p.add(k);};
  c(3,34,17,M(0x2d3b55),-2.5);c(3,34,17,M(0x2d3b55),2.5);const t=new THREE.Mesh(new THREE.BoxGeometry(8*IN,25*IN,15*IN),mat.person);t.position.y=46.5*IN;t.castShadow=true;p.add(t);
  const h=new THREE.Mesh(new THREE.SphereGeometry(4.5*IN,16,12),mat.skin);h.position.y=67*IN;h.castShadow=true;p.add(h);p.position.set(at[0]*IN,0,at[1]*IN);return p;}
+
+// ================= MOVABLE CATTLE-PANEL HOOP RUN + HC TUNNEL + GHOST PARKING SPOTS (shared) =================
+// run local coords: x 0..RL along the run, z 0..RW across, y up from grass. Tunnel port in the x=0 end wall at z PZ0..PZ1, people door in the x=RL end.
+const RL=144,RW=96,HSa=192,HCa=93,HY0a=1;let THa=1.9;for(let i=0;i<40;i++){const f=Math.sin(THa)/THa-HCa/HSa,df=(THa*Math.cos(THa)-Math.sin(THa))/(THa*THa);THa-=f/df;}
+const HRa=HSa/(2*THa),HYCa=HY0a-HRa*Math.cos(THa),HTOPa=HYCa+HRa;
+const arcPa=(t,dr=0)=>{const p=-THa+2*THa*t/HSa;return [RW/2+(HRa+dr)*Math.sin(p),HYCa+(HRa+dr)*Math.cos(p)];};
+const arcYa=(z)=>{const s=(z-RW/2)/HRa;return Math.abs(s)>1?NaN:HYCa+HRa*Math.cos(Math.asin(s));};
+function lineSeg(par,L,m){const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(L.map(v=>v*IN),3));const ls=new THREE.LineSegments(lg,m||meshLine);par.add(ls);return ls;}
+function arcSurfA(par,x0,x1,t0,t1,dr,m,gridS){const N=Math.max(4,Math.round((t1-t0)/4));const pos=[];
+ for(let i=0;i<N;i++){const [za,ya]=arcPa(t0+(t1-t0)*i/N,dr),[zb,yb]=arcPa(t0+(t1-t0)*(i+1)/N,dr);pos.push(x0,ya,za,x1,ya,za,x1,yb,zb,x0,ya,za,x1,yb,zb,x0,yb,zb);}
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos.map(v=>v*IN),3));geo.computeVertexNormals();const me=new THREE.Mesh(geo,m);me.receiveShadow=true;me.castShadow=m!==mat.mesh;par.add(me);
+ if(gridS){const L=[];for(let t=t0;t<=t1+0.01;t+=gridS){const [z,y]=arcPa(t,dr);L.push(x0,y,z,x1,y,z);}for(let x=x0;x<=x1+0.01;x+=gridS)for(let i=0;i<N;i++){const [za,ya]=arcPa(t0+(t1-t0)*i/N,dr),[zb,yb]=arcPa(t0+(t1-t0)*(i+1)/N,dr);L.push(x,ya,za,x,yb,zb);}lineSeg(par,L);}
+ return me;}
+function endWallA(par,xp,hole){const sh=new THREE.Shape();const P=[];for(let i=0;i<=48;i++)P.push(arcPa(i*HSa/48,-0.2));sh.moveTo(P[0][0]*IN,P[0][1]*IN);for(const p of P.slice(1))sh.lineTo(p[0]*IN,p[1]*IN);sh.closePath();
+ if(hole){const h=new THREE.Path();h.moveTo(hole[0]*IN,hole[2]*IN);h.lineTo(hole[1]*IN,hole[2]*IN);h.lineTo(hole[1]*IN,hole[3]*IN);h.lineTo(hole[0]*IN,hole[3]*IN);h.closePath();sh.holes.push(h);}
+ const me=new THREE.Mesh(new THREE.ShapeGeometry(sh),mat.mesh);me.rotation.y=-Math.PI/2;me.position.x=xp*IN;par.add(me);
+ const L=[];for(let z=3;z<=RW-3;z+=3){const yt=arcYa(z);if(!(yt>HY0a))continue;if(hole&&z>hole[0]&&z<hole[1]){if(hole[2]>HY0a)L.push(xp,HY0a,z,xp,hole[2],z);if(yt>hole[3])L.push(xp,hole[3],z,xp,yt,z);}else L.push(xp,HY0a,z,xp,yt,z);}
+ for(let y=HY0a+3;y<HTOPa;y+=3){const dz=Math.sqrt(Math.max(0,HRa*HRa-(y-HYCa)**2));const za=RW/2-dz,zb=RW/2+dz;if(hole&&y>hole[2]&&y<hole[3])L.push(xp,y,za,xp,y,hole[0],xp,y,hole[1],xp,y,zb);else L.push(xp,y,za,xp,y,zb);}lineSeg(par,L);}
+// o={x,z,rotY,PZ0,PZ1,RF(fn)}  returns {grp, AP}
+function buildRun(par,o){const r=newGroup();r.position.set(o.x*IN,0,o.z*IN);r.rotation.y=o.rotY||0;par.add(r);
+ const PW=M(0x8b9196,{metalness:0.7,roughness:0.4});
+ // PT 2x4 base frame on edge (12' sides, 8' ends) = drag runners; front corners chamfered
+ for(const z of [0,RW-1.5])box(r,0,RL,0,3.5,z,z+1.5,mat.pt);for(const x of [0,RL-1.5])box(r,x,x+1.5,0,3.5,1.5,RW-1.5,mat.pt);
+ // 3 x 16' cattle panels (50") bent into the hoop, wires
+ for(const px of [1.5,48.5,95.5]){for(const lx of [0,4,8,13,19,26,34,42,47]){const pts=[];for(let i=0;i<=40;i++){const [z,y]=arcPa(i*HSa/40,0.3);pts.push(new THREE.Vector3((px+lx)*IN,y*IN,z*IN));}
+  r.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),48,0.13*IN,5,false),PW));}
+  for(let t=0;t<=HSa+0.1;t+=8){const [z,y]=arcPa(t,0.3);const c=new THREE.Mesh(new THREE.CylinderGeometry(0.12*IN,0.12*IN,47*IN,6),PW);c.rotation.z=Math.PI/2;c.position.set((px+23.5)*IN,y*IN,z*IN);r.add(c);}}
+ arcSurfA(r,1.5,RL-1.5,0,HSa,-0.2,mat.mesh,6); // 1/2" HC over the whole hoop, hog-ringed
+ // end walls: 2x4 posts + HC; tunnel port at x=0, framed people door 26x56 at x=RL
+ const DZ0=35,DZ1=61,DT=58;
+ for(const z of [o.PZ0-1.5,o.PZ1])box(r,1.5,3,0,23.5,z,z+1.5,mat.pt);box(r,1.5,3,22,23.5,o.PZ0,o.PZ1,mat.pt);
+ endWallA(r,0.2,[o.PZ0,o.PZ1,0,22]);
+ for(const z of [DZ0-3.5,DZ1])box(r,RL-3,RL-1.5,0,arcYa(z+1.75)-1,z,z+3.5,mat.pt);box(r,RL-3,RL-1.5,DT,DT+3.5,DZ0,DZ1,mat.pt);endWallA(r,RL-0.2,[DZ0,DZ1,3.5,DT]);
+ const RD=new THREE.Group();RD.position.set((RL+0.2)*IN,0,DZ0*IN);r.add(RD);box(RD,0,1.5,4,57.5,0,1.5,mat.pt);box(RD,0,1.5,4,57.5,24.5,26,mat.pt);box(RD,0,1.5,4,5.5,1.5,24.5,mat.pt);box(RD,0,1.5,56,57.5,1.5,24.5,mat.pt);box(RD,0,1.5,30,31.5,1.5,24.5,mat.pt);
+ meshPanel(RD,[1.6,4,0],[0,0,26],[0,53.5,0],3);for(const y of [10,50])box(RD,1.5,1.8,y-0.75,y+0.75,-4,4,M(0x222222));RD.userData={closed:0,open:1.6};
+ // predator skirt: 18" 1/2" HC hog-ringed to the base frame, laid flat outward and pinned (lifts with the run when dragged)
+ meshPanel(r,[0,0.2,-0.2],[RL,0,0],[0,0,-18],3);meshPanel(r,[0,0.2,RW+0.2],[RL,0,0],[0,0,18],3);meshPanel(r,[RL+0.2,0.2,0],[0,0,RW],[18,0,0],3);
+ meshPanel(r,[-0.2,0.2,0],[0,0,o.PZ0-2],[-18,0,0],3);meshPanel(r,[-0.2,0.2,o.PZ1+2],[0,0,RW-o.PZ1-2],[-18,0,0],3);
+ // tow rope eyes at the door end + 5-gal waterer
+ for(const z of [6,RW-6]){const e=new THREE.Mesh(new THREE.TorusGeometry(1*IN,0.28*IN,8,14),mat.galv);e.position.set((RL+1.2)*IN,2*IN,z*IN);e.rotation.y=Math.PI/2;r.add(e);}
+ {const w=M(0xe8e8e0,{transparent:true,opacity:0.85});const b=new THREE.Mesh(new THREE.CylinderGeometry(6*IN,6*IN,15*IN,16),w);b.position.set(120*IN,16*IN,48*IN);r.add(b);box(r,112,128,0,8,40,56,M(0x9a9a96));}
+ // shade: 2 roof offcuts over the door-end 4' only (roof-tagged)
+ o.RF(r,()=>{for(const [t0,t1] of [[HSa/2-36,HSa/2],[HSa/2,HSa/2+36]]){arcSurfA(r,RL-50,RL-2,t0,t1,1.0,mat.metal,0);}});
+ return {grp:r,RD};}
+// HC tunnel: sections of 1/2" HC bent over 1x2 PT rails, 18" wide x 20" tall, end frames with hook-eyes. Path from P0 (x,z,y) along unit dir [dx,dz] for len inches, ground drop optional
+function buildTunnel(par,P0,dir,len,yEnd,secs=3){const t=new THREE.Group();par.add(t);const W=18,H=20,sl=len/secs;
+ const at=(s,w,y)=>{const yy=P0[2]+(yEnd-P0[2])*s/len;return [P0[0]+dir[0]*s+(-dir[1])*w,yy+y,P0[1]+dir[1]*s+dir[0]*w];};
+ for(let i=0;i<secs;i++){const s0=i*sl+0.5,s1=(i+1)*sl-0.5;
+  for(const [a,b] of [[[-W/2,0],[-W/2,H]],[[-W/2,H],[W/2,H]],[[W/2,H],[W/2,0]]]){const p0=at(s0,a[0],a[1]),p1=at(s1,a[0],a[1]),p2=at(s0,b[0],b[1]);meshPanel(t,p0,[p1[0]-p0[0],p1[1]-p0[1],p1[2]-p0[2]],[p2[0]-p0[0],p2[1]-p0[1],p2[2]-p0[2]],2);}
+  for(const w of [-W/2,W/2]){const p0=at(s0,w,0),p1=at(s1,w,0);const L=Math.hypot(p1[0]-p0[0],p1[1]-p0[1],p1[2]-p0[2]);const b=new THREE.Mesh(new THREE.BoxGeometry(0.75*IN,1.5*IN,L*IN),mat.pt);b.position.set((p0[0]+p1[0])/2*IN,((p0[1]+p1[1])/2+0.75)*IN,(p0[2]+p1[2])/2*IN);b.lookAt(p1[0]*IN,(p1[1]+0.75)*IN,p1[2]*IN);b.castShadow=true;t.add(b);}
+  for(const s of [s0,s1]){const L=[];const c=[[-W/2,0],[-W/2,H],[W/2,H],[W/2,0]];for(let k=0;k<3;k++){L.push(...at(s,...c[k]),...at(s,...c[k+1]));}lineSeg(t,L,new THREE.LineBasicMaterial({color:0x6b4a2a}));}}
+ return t;}
+// ghost outline of a parked run + its tunnel (faint)
+const GHM=new THREE.LineBasicMaterial({color:0x2f6fd0,transparent:true,opacity:0.55,depthWrite:false});
+function ghostRun(par,o){const r=new THREE.Group();r.position.set(o.x*IN,0,o.z*IN);r.rotation.y=o.rotY||0;par.add(r);const L=[];
+ const rect=(x0,z0,x1,z1,y=0.5)=>L.push(x0,y,z0,x1,y,z0,x1,y,z0,x1,y,z1,x1,y,z1,x0,y,z1,x0,y,z1,x0,y,z0);rect(0,0,RL,RW);rect(-18,-18,RL+18,RW+18,0.3);
+ for(const x of [0,RL/2,RL]){for(let i=0;i<24;i++){const [za,ya]=arcPa(i*HSa/24),[zb,yb]=arcPa((i+1)*HSa/24);L.push(x,ya,za,x,yb,zb);}}
+ for(let i=0;i<=24;i+=4){const [z,y]=arcPa(i*HSa/24);L.push(0,y,z,RL,y,z);}
+ if(o.tun){const [a,b]=o.tun;rect(-o.tlen,a,0,b,0.5);for(const z of [a,b])L.push(-o.tlen,20,z,0,20,z);}
+ lineSeg(r,L,GHM);return r;}
 
 // ================= COMPACT CHICKEN TRACTOR (6 hens): 6' x 12' skids, 5' x 6' walk-in coop + 7' x 6' run =================
 // world coords in inches: x 0 (coop outer end) .. 144 (tow end), y up, z 0 (front, walk-in door, high side) .. 72 (back)
