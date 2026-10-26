@@ -5,8 +5,8 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #hint{font-size:12px;color:#444;margin-top:4px}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}</style></head><body>
 <div id="ui"><button id="mbtn" onclick="toggleMenu()">– Hide menu</button><div id="menuBody"><div id="title"></div>
 
-<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('nestin')">Nests inside</button><button onclick="setView('nestsec')">Nest section</button><button onclick="setView('roost')">Roost</button>
-<button onclick="toggleLabels()">Labels</button><button id="hbtn" onclick="toggleHitch()">Hitch</button><button id="abtn" onclick="toggleApron()">Apron</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button onclick="setView('feed')">Feed bay</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button><button onclick="setView('latches')">Latches</button>
+<button onclick="setView('nest3q')">Nest-end ¾</button><button onclick="setView(1)">Quarter</button><button onclick="setView(2)">Side</button><button onclick="setView(3)">Top</button><button onclick="setView('nest')">Nest</button><button onclick="setView('run')">Run</button><button onclick="setView('under')">Under</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Bridle</button><button onclick="setView('runner')">Skid runner</button><button onclick="setView('apron')">Apron</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('nestin')">Nests inside</button><button onclick="setView('nestsec')">Nest section</button><button onclick="setView('roost')">Roost</button><button onclick="setView('noroof')">No roof (top)</button>
+<button onclick="toggleLabels()">Labels</button><button id="rbtn" onclick="toggleRoof()">Roof: on</button><button id="hbtn" onclick="toggleHitch()">Hitch</button><button id="abtn" onclick="toggleApron()">Apron</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button onclick="setView('feed')">Feed bay</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button><button onclick="setView('latches')">Latches</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. Units: 1 grid square = 1 ft. · <a href="budget.html">Budget version →</a></div></div></div><script>(function(){var K='coopMenuCollapsed',ui=document.getElementById('ui'),mb=document.getElementById('menuBody'),b=document.getElementById('mbtn');function set(c,save){mb.style.display=c?'none':'';ui.classList.toggle('collapsed',c);b.textContent=c?'☰ Menu':'– Hide menu';if(save){try{localStorage.setItem(K,c?'1':'0')}catch(e){}}}window.toggleMenu=function(){set(mb.style.display!=='none',true)};var q=new URLSearchParams(location.search).get('menu'),s=null;try{s=localStorage.getItem(K)}catch(e){}set(q?/^(closed|collapsed|0|min|hide)$/.test(q):(s!==null?s==='1':innerWidth<700),false);})();</script>
 <script>
 console.warn('Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation'),
@@ -1496,7 +1496,9 @@ function coopBox(g,top,wm=mat.t111){ // top(x,z)->roof height at that point
  label(g,'Coop 4x8, floor @ 28"',24,top(24,0)+12,-4);label(g,'clean-out 36x22',24,66,-8,0.8);label(g,'ramp + auto door',70,34,48,0.8);
 }
 // ---------- Option A ----------
-function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>top(z)+3.8;
+function buildG(){const g=newGroup();
+ // ROOF parts are tagged userData.roof=true (hidden by the Roof toggle / No-roof view)
+ const RF=(f)=>{const n=g.children.length;f();for(let i=n;i<g.children.length;i++)g.children[i].userData.roof=true;},RLB=(s)=>{s.userData.roof=true;return s;};const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>top(z)+3.8;
  const cyl=(r,h,x,y,z,m,rx=0,rz=0)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r*IN,r*IN,h*IN,20),m);c.position.set(x*IN,y*IN,z*IN);c.rotation.x=rx;c.rotation.z=rz;c.castShadow=true;g.add(c);return c;};
  // SKIDS: PT 4x4 (3.5x3.5) x 16', no wheels - the coop slides on its skids (soft sandy ground, Perry FL).
  // Front: 10"-long sled-nose taper on the bottom (rises 2" -> 1.5" nose; a true 45 deg cut on a 3.5" skid would only be 3.5" long), steel wear strap wrapped up the taper.
@@ -1544,7 +1546,8 @@ function buildG(){const g=newGroup();const Lx=192,top=(z)=>84-24*z/96,yr=(z)=>to
  for(const x of [0,34.5,69.5,106,142,188.5]){box(g,x,x+3.5,5,top(96)-1.5,92.5,96,mat.pt);}
  box(g,0,Lx,top(0)-1.5,top(0),0,3.5,mat.pt);box(g,0,Lx,top(96)-1.5,top(96),92.5,96,mat.pt);
  // rafters
- for(let x=0;x<=Lx;x+=24){const xx=Math.min(x,Lx-1.5);const r=box(g,xx,xx+1.5,0,3.5,-6,102,mat.pt);r.scale.z=Math.hypot(108,27)/108;r.position.set((xx+.75)*IN,(top(48)+1.75)*IN,48*IN);r.rotation.x=Math.atan2(24,96);}
+ RF(()=>{ for(let x=0;x<=Lx;x+=24){const xx=Math.min(x,Lx-1.5);const r=box(g,xx,xx+1.5,0,3.5,-6,102,mat.pt);r.scale.z=Math.hypot(108,27)/108;r.position.set((xx+.75)*IN,(top(48)+1.75)*IN,48*IN);r.rotation.x=Math.atan2(24,96);}
+ }); // /roof
  // coop 6x8: floor + ply walls
  box(g,0,72,3.5,7,3.5,92.5,mat.pt);box(g,0,72,7,7.5,0,96,mat.wood);
  const t2=mat.t111.clone();t2.side=THREE.DoubleSide;const W=(p)=>quad(g,p,t2);const V=12;
@@ -1752,7 +1755,7 @@ const strut=(xa,ya,xb,yb,z0,z1,th=3.5,m=mat.pt)=>{const L=Math.hypot(xb-xa,yb-ya
  // under-coop HC
  
  // metal roof: 4 sheets, x -3..133
- {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);const sh=box(g,-22,148,0,0.5,0,Lr,mat.metal);sh.position.set(63*IN,yr(48)*IN,48*IN);sh.rotation.x=Math.atan2(dy,108);} // 5 sheets x 34" = 170": x -22..148 (22" overhang past coop end wall)
+ RF(()=>{ {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);const sh=box(g,-22,148,0,0.5,0,Lr,mat.metal);sh.position.set(63*IN,yr(48)*IN,48*IN);sh.rotation.x=Math.atan2(dy,108);} // 5 sheets x 34" = 170": x -22..148 (22" overhang past coop end wall)
  // end overhang framing: top plates extended as outlookers, PT 2x4 fly rafter at x=-22, knee braces to end-wall corner posts
  box(g,-22,0,top(0)-1.5,top(0),0,3.5,mat.pt);box(g,-22,0,top(96)-1.5,top(96),92.5,96,mat.pt);
  {const r=box(g,-22,-20.5,0,3.5,-6,102,mat.pt);r.scale.z=Math.hypot(108,27)/108;r.position.set(-21.25*IN,(top(48)+1.75)*IN,48*IN);r.rotation.x=Math.atan2(24,96);}
@@ -1760,6 +1763,7 @@ const strut=(xa,ya,xb,yb,z0,z1,th=3.5,m=mat.pt)=>{const L=Math.hypot(xb-xa,yb-ya
  for(const [z,t] of [[1.75,top(0)],[94.25,top(96)]]){const k=box(g,-12,12,-0.75,0.75,z-0.75,z+0.75,mat.pt);k.scale.x=Math.hypot(18,18)/24;k.position.set(-9*IN,(t-10.5)*IN,z*IN);k.rotation.z=-Math.PI/4;}
  {const dy=yr(-6)-yr(102),Lr=Math.hypot(108,dy);for(let x=-22;x<=148;x+=9){const rb=box(g,x,x+0.8,0,0.6,0,Lr,mat.metal);rb.position.set((x+0.4)*IN,(yr(48)+0.3)*IN,48*IN);rb.rotation.x=Math.atan2(dy,108);}} // ribs down the slope
  for(const x of [31,65,99]){const sm=box(g,x,x+0.6,0,0.8,-6,102,M(0x6f777c));sm.position.y=(yr(48)+0.6)*IN;sm.scale.z=Math.hypot(108,27)/108;sm.rotation.x=Math.atan2(24,96);}
+ }); // /roof
  // HC top + run walls
  meshPanel(g,[148,yr(0)-0.5,0],[44,0,0],[0,-24,96]);
  meshPanel(g,[72,5,-0.3],[120,0,0],[0,79,0]);meshPanel(g,[72,5,96.3],[120,0,0],[0,55,0]);meshPanel(g,[192.3,5,0],[0,0,96],[0,55,0]);
@@ -1770,7 +1774,7 @@ const strut=(xa,ya,xb,yb,z0,z1,th=3.5,m=mat.pt)=>{const L=Math.hypot(xb-xa,yb-ya
  meshPanel(g,[154.5,6,-0.4],[25.5,0,0],[0,66,0],2);
  for(const y of [10,38,64])box(g,179,183,y,y+1.5,-2.3,-1.8,M(0x222222));box(g,151.2,154.3,37,46,-2,-0.45,mat.pt);hasp([152.7,41.5,-2],[0,0,-1],[1,0,0],4.4,0.1,null,1.3); // two-step latch: hasp + spring snap
  // gutter on low (back) edge + HC guard
- const gy=yr(102)-2.5;box(g,-22,148,gy,gy+4,102,107,mat.galv);meshPanel(g,[-22,gy+4.1,102],[170,0,0],[0,0,5],1);
+ const gy=yr(102)-2.5;RF(()=>{box(g,-22,148,gy,gy+4,102,107,mat.galv);meshPanel(g,[-22,gy+4.1,102],[170,0,0],[0,0,5],1);}); // gutter + guard (roof trim)
  // first-flush diverter (vertical 3" pipe) + downspout to barrel
  cyl(1.75,gy-14,120,(gy+14)/2,104.5,M(0xe8e8e8));box(g,118,122,12,16,102.5,106.5,M(0xcfcfcf)); // diverter cap
  const tp=cyl(1,14,120,40,98,M(0xe8e8e8),Math.PI/2); // tee into barrel through back HC
@@ -1782,8 +1786,8 @@ const strut=(xa,ya,xb,yb,z0,z1,th=3.5,m=mat.pt)=>{const L=Math.hypot(xb-xa,yb-ya
  // feeder under cover
  cyl(6,14,95,30,40,mat.galv);
  // solar
- const sp=new THREE.Mesh(new THREE.BoxGeometry(41.8*IN,1.4*IN,20.9*IN),mat.solar);sp.position.set(30*IN,(yr(16)+2.5)*IN,16*IN);sp.rotation.x=Math.atan2(24,96);sp.castShadow=true;g.add(sp);
- label(g,'100W solar',30,yr(16)+12,16,0.8);label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48);label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
+ const sp=new THREE.Mesh(new THREE.BoxGeometry(41.8*IN,1.4*IN,20.9*IN),mat.solar);sp.userData.roof=true;sp.position.set(30*IN,(yr(16)+2.5)*IN,16*IN);sp.rotation.x=Math.atan2(24,96);sp.castShadow=true;g.add(sp);
+ RLB(label(g,'100W solar',30,yr(16)+12,16,0.8));RLB(label(g,'5 of Terry\'s 3x12 sheets: 22" end overhang + coop + 6\'4" of run',62,yr(48)+18,48));label(g,'HC top 3\'8"',170,yr(48)+8,48,0.8);
  label(g,'Coop 6x8, T1-11 on PT 2x4, floor @ 7-1/2"',36,top(0)+14,-6);label(g,'framed 32x66 door, Z-brace, 3 T-hinges',36,40,-12,0.8);label(g,'12" HC vent band (all walls)',36,top(0)-4,-8,0.75);label(g,'hinged flap (windward)',36,top(96)+2,108,0.75);label(g,'feed bay: Vittles Vault Outback holds 50 lb bag',-12,50,NZ1+10,0.8);label(g,'two-step latches (hasp + spring snap) on all doors/lids',36,54,-14,0.75);label(g,'pop door + step',80,30,48,0.75);
  label(g,'rain barrel + nipples',120,52,82,0.8);
  label(g,'3 rollaway nest boxes (inside)',12,58,NZ0+1.5*NBW,0.8);label(g,'Egg tray + lid (outside)',-12,6,NZ0+1.5*NBW,0.8);label(g,'PT 6x6 beam + 3/8" chain V-bridle to 3-pt, slides on skids',214,40,48,0.85);label(g,'skids: sled-nose + wear strap',196,-6,-10,0.75);label(g,'flip-up HC apron (run only, 8 strips)',130,-4,-16,0.75);
@@ -1798,7 +1802,7 @@ function person(){const g=new THREE.Group();const c=(r,h,y,m,x=0)=>{const k=new 
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",-30,80,-30,0.8);scene.add(plab.userData.labels);
 const G=buildG();scene.add(G);
 document.getElementById('title').textContent='Terry\'s chicken tractor (Option G) — 8x16, all-PT framing, T1-11 coop, 5 metal sheets incl. 22" overhang over egg tray + feed bay';
-const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-4.6,0.9,9.6],[0.4,0.9,4.6]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-8.8,3.4,-0.9],[-0.4,1.9,4.1]],tray:[[-6.6,3.6,0.2],[-0.2,2.0,4.0]],feed:[[-7.0,6.4,12.0],[-0.9,2.4,6.9]],latches:[[-8.5,4.6,-5.5],[0.5,2.6,3.2]],chkdoor:[[1.2,3.6,-3.2],[1.5,3.5,0]],chkrun:[[13,3.6,-3.4],[13,3.4,0]],chkfeed:[[-3.6,3.3,7.0],[-1.4,3.0,6.6]],chktray:[[-3.0,1.6,4.2],[-0.6,1.5,3.9]],chknest:[[3.4,3.6,3.9],[1.9,3.3,3.9]],nestin:[[8.6,5.2,0.0],[1.1,2.55,4.1]],nestsec:[[0.95,2.75,-1.4],[0.75,2.45,3.9]],roost:[[10.2,5.0,1.2],[4.2,2.5,6.6]],roostnest:[[9.2,6.7,-2.5],[3,2.4,5]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]]};
+const VIEWS={apron:[[18.6,2.6,-5.2],[15.4,0.9,0.6]],hitch:[[26,6.5,-5],[18.2,1.0,4]],runner:[[17.7,0.3,-4.2],[15.6,0.6,0.3]],rear:[[-13,6,16],[1,1.6,4.5]],nest3q:[[-15,13,16],[2,3,4]],under:[[-4.6,0.9,9.6],[0.4,0.9,4.6]],end:[[-14,5,4],[3,1.8,4]],tilt:[[30,7,-14],[9,2.5,4]],nest:[[-8.8,3.4,-0.9],[-0.4,1.9,4.1]],tray:[[-6.6,3.6,0.2],[-0.2,2.0,4.0]],feed:[[-7.0,6.4,12.0],[-0.9,2.4,6.9]],latches:[[-8.5,4.6,-5.5],[0.5,2.6,3.2]],chkdoor:[[1.2,3.6,-3.2],[1.5,3.5,0]],chkrun:[[13,3.6,-3.4],[13,3.4,0]],chkfeed:[[-3.6,3.3,7.0],[-1.4,3.0,6.6]],chktray:[[-3.0,1.6,4.2],[-0.6,1.5,3.9]],chknest:[[3.4,3.6,3.9],[1.9,3.3,3.9]],nestin:[[8.6,5.2,0.0],[1.1,2.55,4.1]],nestsec:[[0.95,2.75,-1.4],[0.75,2.45,3.9]],roost:[[10.2,5.0,1.2],[4.2,2.5,6.6]],roostnest:[[9.2,6.7,-2.5],[3,2.4,5]],door:[[15,4,-8],[14,3,0]],run:[[15.6,4.2,5.5],[6,3,4]],1:[[27,10,-15],[7.5,2.8,4]],2:[[8,4,-28],[8,3,4]],3:[[-6,27,-14],[8,1.5,4]],noroof:[[-6.5,24,-8],[4.4,0,5.2]],noroofm:[[-7,40,-12],[3.4,0.3,4.6]]};
 let showLabels=true,detailView=false,hitchUp=false,apronUp=false,trayOpen=false,curView='nest3q';
 // cutaway views: section through the middle nest box (keep z > box centre) / inside view (drop front wall + roof)
 renderer.localClippingEnabled=true;const CLIP={nestsec:[new THREE.Plane(new THREE.Vector3(0,0,1),-(24+1.5*15.17)*IN)],nestin:[new THREE.Plane(new THREE.Vector3(0,0,1),-4*IN),new THREE.Plane(new THREE.Vector3(0,-1,0),56*IN),new THREE.Plane(new THREE.Vector3(-1,0,0),62*IN)]};CLIP.roost=CLIP.roostnest=[CLIP.nestin[0],CLIP.nestin[1],new THREE.Plane(new THREE.Vector3(-1,0,0),72.4*IN)];
@@ -1808,9 +1812,11 @@ function toggleTray(){setTray(!trayOpen);}
 let feedOpen=false;function setFeed(open){feedOpen=open;const L=G.userData.FLID;L.rotation.z=open?L.userData.open:L.userData.closed;const b=document.getElementById('fbtn');if(b)b.textContent=open?'Feed lid: OPEN → close':'Feed lid: closed → open';}
 function toggleFeed(){setFeed(!feedOpen);}
 function showGhost(){const T=G.userData.GT.userData,on=hitchUp||curView==='hitch';T.ghost.visible=T.chain.visible=on;}
-function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lab.visible=showLabels&&detailView==='hitch';}
-function setView(v){if(v==='bridle')v='hitch';const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron'||v==='nestsec'||v==='nestin'||v==='roost'||v==='feed'||v==='latches')?v:v==='roostnest'?'roost':false;curView=v;P6.visible=!(v==='feed'||v==='latches');applyClip(v);showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
+function applyLabels(){G.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;plab.userData.labels.visible=plab.userData.labels.visible&&P6.visible;for(const k in G.userData.DG)G.userData.DG[k].visible=showLabels&&detailView===k;G.userData.GT.userData.lab.visible=showLabels&&detailView==='hitch';}
+function setView(v){if(v==='bridle')v='hitch';if(v==='noroof'||v==='noroofm'){setRoof(false);setFeed(true);v=innerWidth<innerHeight?'noroofm':'noroof';}const [p,t]=VIEWS[v]||VIEWS.nest3q;detailView=(v==='hitch'||v==='runner'||v==='apron'||v==='nestsec'||v==='nestin'||v==='roost'||v==='feed'||v==='latches')?v:v==='roostnest'?'roost':false;curView=v;P6.visible=!(v==='feed'||v==='latches'||/^noroof/.test(v));applyClip(v);showGhost();applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
 function toggleLabels(){showLabels=!showLabels;applyLabels();}
+let roofOn=true;function setRoof(on){roofOn=on;G.traverse(o=>{if(o.userData.roof)o.visible=on;});const b=document.getElementById('rbtn');if(b){b.textContent=on?'Roof: on':'Roof: off';b.classList.toggle('on',!on);}}
+function toggleRoof(){setRoof(!roofOn);}
 scene.add(G.userData.GT);
 function setHitch(up){hitchUp=up;const BP=G.userData.BP,GT=G.userData.GT;
  // LIFTED: coop pivots about the rear skid bottoms (end of the rear bevel, x=8",y=0) so the beam/front rises 6"
@@ -1847,8 +1853,8 @@ function setApron(up){apronUp=up;for(const a of G.userData.AP){const r=up?a.up:a
  document.getElementById('abtn').textContent=up?'Apron: UP (towing) → lower':'Apron: DOWN (parked) → raise';}
 function toggleApron(){setApron(!apronUp);}
 function toggleHitch(){setHitch(!hitchUp);setApron(hitchUp);}
-window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;window.toggleApron=toggleApron;window.toggleTray=toggleTray;window.toggleFeed=toggleFeed;
-const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));{const ap=q.get('apron');setApron(ap?/^(up|1|raised)$/.test(ap):hitchUp);}setTray(/^(open|up|1)$/.test(q.get('tray')||''));setFeed(/^(open|up|1)$/.test(q.get('feed')||''));setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
+window.setView=setView;window.toggleLabels=toggleLabels;window.toggleHitch=toggleHitch;window.toggleApron=toggleApron;window.toggleTray=toggleTray;window.toggleFeed=toggleFeed;window.toggleRoof=toggleRoof;window.setRoof=setRoof;
+const q=new URLSearchParams(location.search);setHitch(/^(up|lifted|1)$/.test(q.get('hitch')||''));{const ap=q.get('apron');setApron(ap?/^(up|1|raised)$/.test(ap):hitchUp);}setTray(/^(open|up|1)$/.test(q.get('tray')||''));setFeed(/^(open|up|1)$/.test(q.get('feed')||''));setRoof(!/^(0|off|no|false|hide)$/.test(q.get('roof')||''));setView(q.get('view')||'nest3q');if(q.get('labels')==='0')toggleLabels();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
 window.__ready=true;

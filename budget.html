@@ -4,8 +4,8 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #title{font-weight:bold;margin-bottom:6px}button{margin:2px;padding:6px 10px;border:1px solid #888;border-radius:5px;background:#f4f4f4;font-size:14px}button.on{background:#2d6;color:#fff;border-color:#1a4}
 #hint{font-size:12px;color:#444;margin-top:4px}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}</style></head><body>
 <div id="ui"><button id="mbtn" onclick="toggleMenu()">– Hide menu</button><div id="menuBody"><div id="title"></div>
-<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop</button><button onclick="setView('inside')">Inside</button><button onclick="setView('hoop')">Hoop run</button><button onclick="setView('runin')">In run</button><button onclick="setView('side')">Side</button><button onclick="setView('top')">Top</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Tow chain</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('feed')">Feed bay</button><button onclick="setView('eave')">Eave vents</button>
-<button onclick="toggleLabels()">Labels</button><button id="dbtn" onclick="toggleDoors()">Doors</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button><button id="abtn" onclick="toggleApron()">Apron</button>
+<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop</button><button onclick="setView('inside')">Inside</button><button onclick="setView('hoop')">Hoop run</button><button onclick="setView('runin')">In run</button><button onclick="setView('side')">Side</button><button onclick="setView('top')">Top</button><button onclick="setView('end')">End</button><button onclick="setView('hitch')">Tow chain</button><button onclick="setView('tray')">Egg tray</button><button onclick="setView('feed')">Feed bay</button><button onclick="setView('eave')">Eave vents</button><button onclick="setView('noroof')">No roof (top)</button>
+<button onclick="toggleLabels()">Labels</button><button id="rbtn" onclick="toggleRoof()">Roof: on</button><button id="dbtn" onclick="toggleDoors()">Doors</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button><button id="abtn" onclick="toggleApron()">Apron</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. 1 grid square = 1 ft. <a href="index.html">← Full design (Option G)</a></div></div></div><script>(function(){var K='coopMenuCollapsed',ui=document.getElementById('ui'),mb=document.getElementById('menuBody'),b=document.getElementById('mbtn');function set(c,save){mb.style.display=c?'none':'';ui.classList.toggle('collapsed',c);b.textContent=c?'☰ Menu':'– Hide menu';if(save){try{localStorage.setItem(K,c?'1':'0')}catch(e){}}}window.toggleMenu=function(){set(mb.style.display!=='none',true)};var q=new URLSearchParams(location.search).get('menu'),s=null;try{s=localStorage.getItem(K)}catch(e){}set(q?/^(closed|collapsed|0|min|hide)$/.test(q):(s!==null?s==='1':innerWidth<700),false);})();</script>
 <script>
 console.warn('Scripts "build/three.js" and "build/three.min.js" are deprecated with r150+, and will be removed with r160. Please use ES Modules or alternatives: https://threejs.org/docs/index.html#manual/en/introduction/Installation'),
@@ -1468,6 +1468,8 @@ function newGroup(){const g=new THREE.Group();g.userData.labels=new THREE.Group(
 // ================= BUDGET CHICKEN TRACTOR (6 hens) =================
 // coords in inches: x = length (0 coop outer end .. 192 tow end), y = up, z = width (0..96 across skids)
 const g=newGroup();
+// ROOF parts are tagged userData.roof=true (hidden by the Roof toggle / No-roof view)
+const RF=(f)=>{const n=g.children.length;f();for(let i=n;i<g.children.length;i++)g.children[i].userData.roof=true;},RLB=(s)=>{s.userData.roof=true;return s;};
 const cyl=(r,h,x,y,z,m,rx=0,rz=0,par=g)=>{const c=new THREE.Mesh(new THREE.CylinderGeometry(r*IN,r*IN,h*IN,16),m);c.position.set(x*IN,y*IN,z*IN);c.rotation.x=rx;c.rotation.z=rz;c.castShadow=true;par.add(c);return c;};
 const rod=(A,B,r,m,par=g)=>{const a=new THREE.Vector3(...A).multiplyScalar(IN),b=new THREE.Vector3(...B).multiplyScalar(IN);const d=b.clone().sub(a);
  const mm=new THREE.Mesh(new THREE.CylinderGeometry(r*IN,r*IN,d.length(),8),m);mm.position.copy(a).add(b).multiplyScalar(0.5);mm.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());mm.castShadow=true;par.add(mm);return mm;};
@@ -1514,9 +1516,11 @@ for(const [x0,x1,z0,z1] of [[-1.35,-0.6,-1.35,2.5],[45.5,49.35,-1.35,-0.6],[-1.3
 // ---------- ROOF: 4 PT 2x4 rafters + 4 flat 2x4 purlins, Terry's own metal (3 sheets cut to ~57") ----------
 const SL=Math.atan2(6,48);
 const slopeBox=(xa,xb,yoff,h,z0,z1,m)=>{const L=(xb-xa)/Math.cos(SL);const b=new THREE.Mesh(new THREE.BoxGeometry(L*IN,h*IN,(z1-z0)*IN),m);const xc=(xa+xb)/2;b.position.set(xc*IN,(wallTop(xc)+yoff+h/2)*IN,(z0+z1)/2*IN);b.rotation.z=SL;b.castShadow=b.receiveShadow=true;g.add(b);return b;};
+RF(()=>{
 for(const z of [0,31.5,63,94.5])slopeBox(-8,48.6,0,3.5,z,z+1.5,mat.pt);
 for(const x of [-7.5,9,27,45])box(g,x,x+3.5,wallTop(x+1.75)+3.5,wallTop(x+1.75)+5,-6,102,mat.pt);
 for(const z0 of [-6,30,66]){slopeBox(-8,48.6,5,0.06,z0+0.2,z0+35.8,mat.metal);for(let z=z0+4.5;z<z0+36;z+=9)slopeBox(-8,48.6,5,0.5,z-0.4,z+0.4,mat.metal);}
+}); // /roof
 // ---------- EAVE / RAFTER-BAY SCREENS: 1/2" HC stapled to rafters + top plate, both 8' walls ----------
 // low side (x=0): open bay = plate to underside of metal (3.5" rafter + 1.5" purlin layer, no purlin over the plate) ~5" tall
 // high side (x=48): plate to underside of the purlin sitting on the wall line ~3.5" tall
@@ -1602,7 +1606,7 @@ arcSurf(48.6,184,0,HS,-0.2,hcM,6);
 {const L=[];for(const t of [36,HS-36]){const [z,y]=arcP(t,-0.1);L.push(48.6,y,z,184,y,z);}const lg=new THREE.BufferGeometry();lg.setAttribute('position',new THREE.Float32BufferAttribute(L.map(v=>v*IN),3));g.add(new THREE.LineSegments(lg,new THREE.LineBasicMaterial({color:0x444444})));}
 // SHADE: 2 leftover roof offcuts (36" x ~86") laid lengthwise over the top, flexed across the ribs
 const shadeM=mat.metal;
-for(const [t0,t1] of [[HS/2-36,HS/2],[HS/2,HS/2+36]]){arcSurf(49,135,t0,t1,1.0,shadeM,0);for(let t=t0+4.5;t<t1;t+=9){const [z,y]=arcP(t,1.4);box(g,49,135,y-0.35,y+0.35,z-0.4,z+0.4,shadeM);}}
+RF(()=>{for(const [t0,t1] of [[HS/2-36,HS/2],[HS/2,HS/2+36]]){arcSurf(49,135,t0,t1,1.0,shadeM,0);for(let t=t0+4.5;t<t1;t+=9){const [z,y]=arcP(t,1.4);box(g,49,135,y-0.35,y+0.35,z-0.4,z+0.4,shadeM);}}}); // /roof (hoop shade offcuts)
 // hoop end wall (x=184): 2x4 door posts + header, HC infill, framed HC run door 27 x 53
 const arcY=(z)=>{const s=(z-48)/HR;return HYC+HR*Math.cos(Math.asin(Math.max(-1,Math.min(1,s))));};
 const DZ0=34.5,DZ1=61.5,DTOP=60;
@@ -1637,13 +1641,13 @@ box(g,152,168,0,8,64,72,M(0x9a9a96));box(g,152,168,0,8,72,80,M(0x9a9a96)); // 2 
 // ---------- LABELS + DIMENSIONS ----------
 label(g,'Budget tractor: 4x8 reach-in coop + cattle-panel hoop run (6 hens)',96,HTOP+22,48,1.05);
 label(g,'Coop 4x8, T1-11 (painted) on PT 2x4, floor @ 7-3/4"',24,roofTop(24)+12,-8,0.8);
-label(g,'Terry\'s metal (3 sheets cut to 57")',20,roofTop(20)+4,104,0.7);label(g,'rafter bays screened w/ 1/2" HC (vents)',-10,wallTop(0)+3,70,0.6);
+RLB(label(g,'Terry\'s metal (3 sheets cut to 57")',20,roofTop(20)+4,104,0.7));label(g,'rafter bays screened w/ 1/2" HC (vents)',-10,wallTop(0)+3,70,0.6);
 label(g,'52x30 cleanout door, Z-brace',-6,40,34,0.7);label(g,'36x28 side door',24,46,104,0.65);
 label(g,'egg tray + metal lid (3 rollaway nests inside)',20,FL+2,-18,0.7);
 label(g,'feed bay: Vittles Vault Outback 50 lb',-14,BY1+8,96,0.65);
 label(g,'3 x 16\' cattle panels bent into 6\'1" hoop',120,HTOP+8,-4,0.75);
 label(g,'1/2" HC wrap (all of it), hog-ringed',150,40,-12,0.7);
-label(g,'roof offcuts = shade',92,HTOP+3,48,0.7);
+RLB(label(g,'roof offcuts = shade',92,HTOP+3,48,0.7));
 label(g,'HC run door 27x53',187,30,48,0.6);label(g,'PT 4x6 x 16\' skids laid flat, both ends upturned',120,-5,-18,0.7);
 label(g,'1/2" bolt thru skid nose + 3/8" G70 chain V to drawbar',226,24,20,0.7);
 label(g,'manual slide pop door + cleat ramp',62,26,84,0.65);label(g,'5-gal waterer on blocks',160,36,82,0.6);label(g,'flip-up HC apron 12"',120,-3,108,0.6);
@@ -1666,21 +1670,22 @@ function person(){const p=new THREE.Group();const c=(r,h,y,m,z)=>{const k=new TH
 const P6=person();scene.add(P6);const plab=newGroup();label(plab,"6' person",130,80,-34,0.7);scene.add(plab.userData.labels);
 document.getElementById('title').textContent='Terry\'s BUDGET chicken tractor — 8x16 skids, 4x8 reach-in coop + cattle-panel hoop run, chain V tow';
 const VIEWS={overview:[[-9.5,8.5,-10.5],[7,2.2,4]],1:[[-9.5,8.5,-10.5],[7,2.2,4]],coop:[[-8.6,6.2,-6.4],[1.0,2.0,4.0]],inside:[[2.0,9.5,-1.6],[2.0,1.2,3.4]],hoop:[[24,7.5,-8.5],[10.5,2.6,4]],run:[[24,7.5,-8.5],[10.5,2.6,4]],
- runin:[[14.6,4.0,5.6],[6,2.3,3.4]],side:[[8,4,-27],[8,3,4]],2:[[8,4,-27],[8,3,4]],top:[[8,30,4.3],[8,0,4]],3:[[8,30,4.3],[8,0,4]],end:[[-14,4.5,4],[3,2,4]],hitch:[[24.5,6,-3],[17.5,0.6,4]],tray:[[-3.2,3.2,-5.2],[2,1.3,0]],feed:[[-6.5,4.8,9.5],[-0.8,1.8,6.5]],mobile:[[-13,11,-15],[8,2.2,4]],eave:[[-4.6,3.3,0.2],[0,4.3,3.2]],eavehi:[[9.0,3.6,3.0],[4,4.3,4.4]]};
+ runin:[[14.6,4.0,5.6],[6,2.3,3.4]],side:[[8,4,-27],[8,3,4]],2:[[8,4,-27],[8,3,4]],top:[[8,30,4.3],[8,0,4]],3:[[8,30,4.3],[8,0,4]],end:[[-14,4.5,4],[3,2,4]],hitch:[[24.5,6,-3],[17.5,0.6,4]],tray:[[-3.2,3.2,-5.2],[2,1.3,0]],feed:[[-6.5,4.8,9.5],[-0.8,1.8,6.5]],mobile:[[-13,11,-15],[8,2.2,4]],eave:[[-4.6,3.3,0.2],[0,4.3,3.2]],eavehi:[[9.0,3.6,3.0],[4,4.3,4.4]],noroof:[[-7.5,22,15.5],[3.4,0,1.6]],noroofm:[[-9,24,19],[2,0.5,3.8]]};
 let showLabels=true,detailView=false,curView='overview',trayOpen=false,feedOpen=false,doorsOpen=false,apronUp=false;
 renderer.localClippingEnabled=true;const CLIP={inside:[new THREE.Plane(new THREE.Vector3(0,-1,0),(FL+33)*IN),new THREE.Plane(new THREE.Vector3(-1,0,0),52*IN)]};
 function applyClip(v){const pl=CLIP[v]||null;g.traverse(o=>{if(!o.material||o.isSprite||o.isLine)return;const ms=Array.isArray(o.material)?o.material:[o.material];for(const m of ms){if(m.userData.side0===undefined)m.userData.side0=m.side;m.clippingPlanes=pl;m.clipShadows=!!pl;m.side=pl?THREE.DoubleSide:m.userData.side0;m.needsUpdate=true;}});}
 function applyLabels(){g.userData.labels.visible=plab.userData.labels.visible=showLabels&&!detailView;plab.userData.labels.visible=plab.userData.labels.visible&&P6.visible;for(const k in DG)DG[k].visible=showLabels&&detailView===k;}
-function setView(v){if(!VIEWS[v])v='overview';const [p,t]=VIEWS[v];detailView=(v==='coop'||v==='tray'||v==='feed')?'coop':(v==='inside'||v==='hitch'||v==='eave'||v==='eavehi')?v:false;curView=v;P6.visible=!(v==='coop'||v==='tray'||v==='feed'||v==='inside'||v==='hoop'||v==='run'||v==='eave'||v==='eavehi');GT.visible=true;
+function setView(v){if(v==='noroof'||v==='noroofm'){setRoof(false);setFeed(true);v=innerWidth<innerHeight?'noroofm':'noroof';}if(!VIEWS[v])v='overview';const [p,t]=VIEWS[v];detailView=(v==='coop'||v==='tray'||v==='feed')?'coop':(v==='inside'||v==='hitch'||v==='eave'||v==='eavehi')?v:false;curView=v;P6.visible=!(v==='coop'||v==='tray'||v==='feed'||v==='inside'||v==='hoop'||v==='run'||v==='eave'||v==='eavehi'||/^noroof/.test(v));GT.visible=true;
  applyClip(v);applyLabels();camera.position.set(...p);controls.target.set(...t);controls.update();}
 const btxt=(id,t)=>{const b=document.getElementById(id);if(b)b.textContent=t;};
 function setTray(o){trayOpen=o;TLID.rotation.x=o?TLID.userData.open:0;btxt('tbtn',o?'Egg tray: OPEN':'Egg tray: closed');}
 function setFeed(o){feedOpen=o;FLID.rotation.z=o?FLID.userData.open:0;btxt('fbtn',o?'Feed lid: OPEN':'Feed lid: closed');}
 function setDoors(o){doorsOpen=o;for(const d of DOORS)d.rotation.y=o?d.userData.open:0;btxt('dbtn',o?'Doors: OPEN':'Doors: closed');}
+let roofOn=true;function setRoof(on){roofOn=on;g.traverse(o=>{if(o.userData.roof)o.visible=on;});const b=document.getElementById('rbtn');if(b){b.textContent=on?'Roof: on':'Roof: off';b.classList.toggle('on',!on);}}
 function setApron(up){apronUp=up;for(const a of AP){const r=up?a.up:a.down;if(a.ax==='x')a.p.rotation.set(r,0,0);else a.p.rotation.set(0,0,r);}btxt('abtn',up?'Apron: UP (towing)':'Apron: DOWN (parked)');}
-window.setView=setView;window.toggleLabels=()=>{showLabels=!showLabels;applyLabels();};window.toggleTray=()=>setTray(!trayOpen);window.toggleFeed=()=>setFeed(!feedOpen);window.toggleDoors=()=>setDoors(!doorsOpen);window.toggleApron=()=>setApron(!apronUp);
+window.setView=setView;window.toggleLabels=()=>{showLabels=!showLabels;applyLabels();};window.toggleTray=()=>setTray(!trayOpen);window.toggleFeed=()=>setFeed(!feedOpen);window.toggleDoors=()=>setDoors(!doorsOpen);window.toggleApron=()=>setApron(!apronUp);window.toggleRoof=()=>setRoof(!roofOn);window.setRoof=setRoof;
 const q=new URLSearchParams(location.search);const on=(k)=>/^(open|up|1|yes|raised)$/.test(q.get(k)||'');
-setTray(on('tray'));setFeed(on('feed'));setDoors(on('doors'));setApron(on('apron'));setView(q.get('view')||(innerWidth<700?'mobile':'overview'));{const lp=q.get('labels');if(lp==='0'||lp==='off'||(lp!=='1'&&lp!=='on'&&innerWidth<700))window.toggleLabels();} // labels off by default on phones
+setTray(on('tray'));setFeed(on('feed'));setDoors(on('doors'));setApron(on('apron'));setRoof(!/^(0|off|no|false|hide)$/.test(q.get('roof')||''));setView(q.get('view')||(innerWidth<700?'mobile':'overview'));{const lp=q.get('labels');if(lp==='0'||lp==='off'||(lp!=='1'&&lp!=='on'&&innerWidth<700))window.toggleLabels();} // labels off by default on phones
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 (function loop(){requestAnimationFrame(loop);controls.update();renderer.render(scene,camera);})();
 window.__ready=true;
