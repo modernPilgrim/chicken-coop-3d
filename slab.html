@@ -1607,16 +1607,17 @@ const PUR=[0.75,24,48,72,96,120,144,168,191.25];
   // H2.5A: ~5" galv tie on the outer beam face + purlin side: lower leg nailed to the beam, upper leg to the purlin
   for(const z of [-1.6,97.5])box(E,xc+0.75,xc+0.87,rb(xc+0.81)+BD-2.5,rb(xc+0.81)+BD+2.5,z-1.5,z+1.5,mat.galv);}
  for(let i=0;i<PUR.length-1;i++){const a=PUR[i]+0.75,b=PUR[i+1]-0.75;for(const z of [3.5,91])sbox(E,a,b,BD,BD+PD,z,z+1.5,mat.pt);}
- } // framing stays visible with ?roof=0; only the metal + closures are roof-tagged (the inner-layer blocking closes the purlin bays over the coop's HC sides)
+ } // framing stays visible with ?roof=0; only the metal + HC closure strips are roof-tagged (the inner-layer blocking closes the purlin bays over the coop's HC sides)
 RFg(E,()=>{
  // 4 panels 36" wide x 208" (17'4"), one-corrugation side laps (33" net each = 135"), 8" overhang at both ends, ~19.5" past each beam
  const CM=M(0xc9cfd3,{metalness:0.25,roughness:0.5,side:THREE.DoubleSide}),CM2=M(0xb4bbc0,{metalness:0.25,roughness:0.55});
  for(let k=0;k<4;k++){const z0=-19.5+33*k,z1=z0+36,dz=k*0.12;sbox(E,-8,200,0.2+dz,0.3+dz,z0,z1,CM,rm);
   for(let z=z0+1.33;z<z1;z+=2.67)sbox(E,-8,200,0.3+dz,0.8+dz,z-0.45,z+0.45,CM2,rm);}
- // foam closures at both ends
- sbox(E,-8,-7,0.2,0.8,-19.5,115.5,M(0x333333),rm);
- // foam closures on the front coop purlin (x=0.75) seal the corrugations over the front HC (wasps, wind-driven rain, snakes); none needed at x=48 (run side is inside the HC envelope)
- sbox(E,0,1.5,0,0.25,3.5,92.5,M(0x333333),rm);sbox(E,199,200,0.2,0.8,-19.5,115.5,M(0x333333),rm);});
+ // NO FOAM CLOSURES: 1/2" HC closure strips on the outer faces of both end purlins (x=0 high end, x=192 low end), full panel width -19.5..115.5:
+ // 5" strips, 3" down the purlin face (screw + 1" fender washer every 8") and the top 2" folded/crimped up into the panel ribs - stops wasps, birds and snakes in the corrugations
+ {const WC=M(0xd8dde0,{metalness:0.8,roughness:0.25});
+  for(const [xf,xw] of [[-0.45,-0.6],[192.45,192.6]]){const y0=rm(xf<96?0:192);meshPanel(E,[xf,y0-3,-19.5],[0,0,135],[0,3.75,0],1.5);
+   for(let z=-19;z<=115.5;z+=7.94)cylG(E,0.5,0.14,xw,y0-1.5,z,WC,0,Math.PI/2);}}});
 // ---------- FEED: Vittles Vault 50 lb outside the run beside the gate, strapped to the wall; lid = FLID ----------
 let FLID;{const bx0=99,bx1=113,bz0=97.5,bz1=117.5,BIN=M(0x3a3d40,{roughness:0.6});for(const x of [100,108])box(E,x,x+3.5,0,1.5,bz0,bz1+1,mat.pt);
  box(E,bx0,bx1,1.5,22.5,bz0,bz1,BIN);FLID=new THREE.Group();FLID.position.set(bx1*IN,22.5*IN,(bz0+bz1)/2*IN);E.add(FLID);box(FLID,bx0-bx1,0,0,1.5,-10,10,M(0x24272a));
