@@ -4,7 +4,7 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #title{font-weight:bold;margin-bottom:6px}button{margin:2px;padding:6px 10px;border:1px solid #888;border-radius:5px;background:#f4f4f4;font-size:14px}button.on{background:#2d6;color:#fff;border-color:#1a4}
 #hint{font-size:12px;color:#444;margin-top:4px}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}</style></head><body>
 <div id="ui"><button id="mbtn" onclick="toggleMenu()">– Hide menu</button><div id="menuBody"><div id="title"></div>
-<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop doors</button><button onclick="setView('inside')">Inside</button><button onclick="setView('nests')">Nests / egg tray</button><button onclick="setView('roost')">Roost</button><button onclick="setView('run')">Run</button><button onclick="setView('gate')">Gate side</button><button onclick="setView('top')">Top</button><button onclick="setView('noroof')">No roof (top)</button>
+<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop doors</button><button onclick="setView('inside')">Inside</button><button onclick="setView('nests')">Nests / egg tray</button><button onclick="setView('roost')">Roost</button><button onclick="setView('run')">Run</button><button onclick="setView('gate')">Gate side</button><button onclick="setView('roofdetail')">Roof detail</button><button onclick="setView('top')">Top</button><button onclick="setView('noroof')">No roof (top)</button>
 <button onclick="toggleLabels()">Labels</button><button id="rbtn" onclick="toggleRoof()">Roof: on</button><button id="dbtn" onclick="toggleDoors()">Doors</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. 1 grid square = 1 ft. <a href="index.html">Full design</a> · <a href="budget.html">Budget</a> · <a href="compact.html">Compact</a> · <a href="stationary.html">Stationary</a> · <a href="grainbin.html">Grain bin</a> · <a href="reachin.html">Reach-in</a></div></div></div><script>(function(){var K='coopMenuCollapsed',ui=document.getElementById('ui'),mb=document.getElementById('menuBody'),b=document.getElementById('mbtn');function set(c,save){mb.style.display=c?'none':'';ui.classList.toggle('collapsed',c);b.textContent=c?'☰ Menu':'– Hide menu';if(save){try{localStorage.setItem(K,c?'1':'0')}catch(e){}}}window.toggleMenu=function(){set(mb.style.display!=='none',true)};var q=new URLSearchParams(location.search).get('menu'),s=null;try{s=localStorage.getItem(K)}catch(e){}set(q?/^(closed|collapsed|0|min|hide)$/.test(q):(s!==null?s==='1':innerWidth<700),false);})();</script>
 <script>
@@ -1426,10 +1426,10 @@ class OrbitControls extends EventDispatcher {
 const IN=1/12; // inches -> feet units
 const scene=new THREE.Scene(); scene.background=new THREE.Color(0xbfd9ee);
 scene.fog=new THREE.Fog(0xbfd9ee,60,140);
-const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true,logarithmicDepthBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;document.body.appendChild(renderer.domElement);
-const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.1,500);
+const camera=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,0.25,500);
 const controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;
 controls.maxPolarAngle=Math.PI*0.495;controls.target.set(6,2.5,4);
 scene.add(new THREE.HemisphereLight(0xffffff,0x667744,0.9));
@@ -1575,15 +1575,18 @@ const DOORS=[];
  hasp([85.5,44,96.1],[0,0,1],[-1,0,0],2.4,0.25,G,1.0);}
 // ---------- ROOF (all roof-tagged): 9 PT 2x4 purlins across the width @24" OC on edge, H2.5A ties, 2x4 blocking over the beams, Terry's 4 panels ----------
 const PUR=[0.75,24,48,72,96,120,144,168,191.25];
-RFg(E,()=>{for(const xc of PUR){box(E,xc-0.75,xc+0.75,rb(xc)+BD,rb(xc)+BD+PD,-18,114,mat.pt);
-  for(const z of [-1.6,97.5])box(E,xc+0.75,xc+0.87,rb(xc)+BD-2,rb(xc)+BD+2.5,z-1.5,z+1.5,mat.galv);}
+{for(const xc of PUR){sbox(E,xc-0.75,xc+0.75,BD,BD+PD,-18,114,mat.pt);   // on edge, bottom on the beam tops, top = metal underside (rm)
+  // H2.5A: ~5" galv tie on the outer beam face + purlin side: lower leg nailed to the beam, upper leg to the purlin
+  for(const z of [-1.6,97.5])box(E,xc+0.75,xc+0.87,rb(xc+0.81)+BD-2.5,rb(xc+0.81)+BD+2.5,z-1.5,z+1.5,mat.galv);}
  for(let i=0;i<PUR.length-1;i++){const a=PUR[i]+0.75,b=PUR[i+1]-0.75;for(const z of [3.5,91])sbox(E,a,b,BD,BD+PD,z,z+1.5,mat.pt);}
+ } // framing stays visible with ?roof=0; only the metal + closures are roof-tagged
+RFg(E,()=>{
  // 4 panels 36" wide x 208" (17'4"), one-corrugation side laps (33" net each = 135"), 8" overhang at both ends, ~19.5" past each beam
  const CM=M(0xc9cfd3,{metalness:0.25,roughness:0.5,side:THREE.DoubleSide}),CM2=M(0xb4bbc0,{metalness:0.25,roughness:0.55});
- for(let k=0;k<4;k++){const z0=-19.5+33*k,z1=z0+36,dz=k*0.12;sbox(E,-8,200,0.05+dz,0.13+dz,z0,z1,CM,rm);
-  for(let z=z0+1.33;z<z1;z+=2.67)sbox(E,-8,200,0.13+dz,0.6+dz,z-0.45,z+0.45,CM2,rm);}
+ for(let k=0;k<4;k++){const z0=-19.5+33*k,z1=z0+36,dz=k*0.12;sbox(E,-8,200,0.2+dz,0.3+dz,z0,z1,CM,rm);
+  for(let z=z0+1.33;z<z1;z+=2.67)sbox(E,-8,200,0.3+dz,0.8+dz,z-0.45,z+0.45,CM2,rm);}
  // foam closures at both ends
- sbox(E,-8,-7,-0.6,0.1,-19.5,115.5,M(0x333333),rm);sbox(E,199,200,-0.6,0.1,-19.5,115.5,M(0x333333),rm);});
+ sbox(E,-8,-7,0.2,0.8,-19.5,115.5,M(0x333333),rm);sbox(E,199,200,0.2,0.8,-19.5,115.5,M(0x333333),rm);});
 // ---------- FEED: Vittles Vault 50 lb outside the run beside the gate, strapped to the wall; lid = FLID ----------
 let FLID;{const bx0=99,bx1=113,bz0=97.5,bz1=117.5,BIN=M(0x3a3d40,{roughness:0.6});for(const x of [100,108])box(E,x,x+3.5,0,1.5,bz0,bz1+1,mat.pt);
  box(E,bx0,bx1,1.5,22.5,bz0,bz1,BIN);FLID=new THREE.Group();FLID.position.set(bx1*IN,22.5*IN,(bz0+bz1)/2*IN);E.add(FLID);box(FLID,bx0-bx1,0,0,1.5,-10,10,M(0x24272a));
@@ -1681,7 +1684,7 @@ dim(g,[-10,S,-4],[-10,S+rb(0),-4],"7'",[0,0,-8]);dim(g,[200,S,-4],[200,S+rb(192)
 scene.add(g);
 const VIEWS={overview:[[-11,12,22],[8,2.5,5]],mobile:[[-30,44,16],[9,0.5,4.5]],coop:[[-9,5.5,8],[2,3,4]],inside:[[-1.5,13,4.01],[2,1,4]],
  nests:[[2.5,3.8,14],[2,1.6,8.4]],roost:[[-6.5,4.5,1.2],[2.5,3,1.6]],run:[[27,9,-7],[10,2.5,4]],gate:[[3,7,25],[7,3.2,7]],
- top:[[8,44,4.01],[8,0,4]],noroof:[[8,22,17],[8,0,4]],noroofm:[[-6,31,4],[8.5,0,4]]};
+ roofdetail:[[18.6,6.0,-3.0],[14.5,6.5,0.2]],top:[[8,44,4.01],[8,0,4]],noroof:[[8,22,17],[8,0,4]],noroofm:[[-6,31,4],[8.5,0,4]]};
 const CLIP={inside:[new THREE.Plane(new THREE.Vector3(0,-1,0),(S+47)*IN)]};
 glue({g,VIEWS,CLIP,TLID,FLID,DOORS,AP:[],personAt:[-46,128],personY:S,hideP6:['coop','nests','roost','inside'],
  title:'Terry\'s SLAB 8x16 — reach-in 4x8 coop + 8x12 sand run under one shed roof of his 4 panels (high end 7\', low end 6\')'});
