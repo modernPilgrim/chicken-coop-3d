@@ -1551,11 +1551,29 @@ for(const [zo,zi] of [[-1.5,3.5],[96,91]]){
  for(const [a,b] of [[0.5,96],[96,191.5]])sbox(E,a,b,0,BD,zo,zo+1.5,mat.pt);
  for(const [a,b] of [[0.5,144],[144,191.5]])sbox(E,a,b,0,BD,zi,zi+1.5,mat.pt);
  for(const x0 of PX)for(const dy of [1.5,4])cylG(E,0.5,zo<0?8:8,x0+1.75,rb(x0+1.75)+dy,zo<0?1.75:94.25,mat.galv,Math.PI/2);}
-// ---------- KNEE BRACES 2x4 x 24" @45 deg (skip the gate bay) ----------
-function kb(xf,dir,zp0,zp1){const yt=rb(xf+dir*8.5)-0,L=24,b=box(E,-L/2,L/2,-1.75,1.75,zp0,zp1,mat.pt);b.position.set((xf+dir*8.5)*IN,(rb(xf)-8.5)*IN,(zp0+zp1)/2*IN);b.rotation.z=dir*Math.PI/4;}
-for(const [xf,dir] of [[48,1],[94.25,-1],[97.75,1],[142.25,-1],[145.75,1],[188.5,-1]])kb(xf,dir,3.5,5);   // z=0 wall (inside face)
-for(const [xf,dir] of [[97.75,1],[142.25,-1],[145.75,1],[188.5,-1]])kb(xf,dir,91,92.5);                  // z=96 wall
-for(const [zf,dir] of [[3.5,1],[92.5,-1]]){const L=24,b=box(E,187,188.5,-L/2,L/2,-1.75,1.75,mat.pt);b.position.set(187.75*IN,(rb(190)-8.5)*IN,(zf+dir*8.5)*IN);b.rotation.x=dir*Math.PI/4;}
+// ---------- KNEE BRACES 2x4 x 24" @45 deg (skip the gate bay: post B -> post C is clear for the full-bay gate) ----------
+// Each brace: 2x4 (3-1/2 in plane, 1-1/2 thick) CENTERED on the post/beam line, lower edge 24" long point, 45 deg plumb cut tight to the post face,
+// top cut parallel to the beam underside (the beams slope 3/4:12 = 3.58 deg, so the top cut is 41.4 deg on braces on the low-end side of a post
+// and 48.6 deg on the high-end side; 45 deg at the level end rail). The doubled 2x6 beams have a 3-1/2" gap between the plies (the post width),
+// so a 4x4 filler block (8", from the post drops) is screwed between the plies over each side-wall brace: flush with the beam bottom = full bearing.
+const KBA=24/Math.SQRT2,KBC=3.5/Math.SQRT2;
+function prismXY(pts,w0,w1,map,flip=false){let ar=0;for(let k=0;k<pts.length;k++){const n=(k+1)%pts.length;ar+=pts[k][0]*pts[n][1]-pts[n][0]*pts[k][1];}
+ if((ar<0)!==flip)pts=pts.slice().reverse();   // CCW in (a,b) for a right-handed map, CW for a mirrored one -> outward normals
+ const v=[],q=pts.length,P=(k,w)=>map(pts[k][0],pts[k][1],w),tri=(a,b,c)=>v.push(...a,...b,...c);
+ for(let k=1;k<q-1;k++){tri(P(0,w0),P(k+1,w0),P(k,w0));tri(P(0,w1),P(k,w1),P(k+1,w1));}
+ for(let k=0;k<q;k++){const n=(k+1)%q;tri(P(k,w0),P(n,w1),P(k,w1));tri(P(k,w0),P(n,w0),P(n,w1));}
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(v.map(t=>t*IN),3));g.computeVertexNormals();
+ const m=new THREE.Mesh(g,mat.pt);m.castShadow=true;m.receiveShadow=true;E.add(m);return m;}
+// knee brace in a plane: post face at a=af, brace runs toward +u; beam underside y=A+B*a (a = x for side walls, z for the end wall)
+function knee(af,u,A,B,w0,w1,map,flip=false){const y0=A+B*(af+u*KBA)-KBA+KBC,hit=yE=>(A-yE+u*af)/(u-B);
+ const P1=[af,y0+KBC],P2=[af,y0-KBC],Q2=[hit(y0-KBC),A+B*hit(y0-KBC)],Q1=[hit(y0+KBC),A+B*hit(y0+KBC)];
+ return prismXY([P2,Q2,Q1,P1],w0,w1,map,flip);}
+const SLP=(HI-LO)/LEN,mapXZ=(a,b,w)=>[a,b,w];
+for(const [z0,z1] of [[0,3.5],[92.5,96]]){const zc=(z0+z1)/2;
+ const list=z0<1?[[48,1],[94.25,-1],[97.75,1],[142.25,-1],[145.75,1],[188.5,-1]]:[[97.75,1],[142.25,-1],[145.75,1],[188.5,-1]]; // z=96: none in the gate bay (post B -> post C)
+ for(const [xf,u] of list){knee(xf,u,HI,-SLP,zc-0.75,zc+0.75,mapXZ);
+  const a=xf+u*10,b=xf+u*18;sbox(E,Math.min(a,b),Math.max(a,b),0,BD,z0,z1,mat.pt);}}           // 4x4 filler between the beam plies over the brace
+{const yR=rb(191.25)+BD-3.5;for(const [zf,u] of [[3.5,1],[92.5,-1]])knee(zf,u,yR,0,189.5,191,(a,b,w)=>[w,b,a],true);} // low end: under the end top rail (level)
 // end-wall mid stud (low end) + 2x4 HC nailers above the coop top plates (front + back), top plate -> purlin, faces flush with the purlin faces
 box(E,188.5,192,0,rb(191.25)+BD-3.5,47.25,48.75,mat.pt);box(E,188.5,192,rb(191.25)+BD-3.5,rb(191.25)+BD,3.5,92.5,mat.pt); // end mid stud + end top rail
 box(E,0,1.5,CT,rb(0.75)+BD,47.25,48.75,mat.pt);                      // front HC nailer (face x=0 = post / top plate / purlin face)
@@ -1569,7 +1587,7 @@ box(E,3.6,5.1,0,7.25,5.1,90.9,mat.pt); // high end, inside the coop-end posts (u
 box(E,5.1,187,0,5,5.1,90.9,SAND);    // full-length sand, open under the coop
 // ---------- 1/2" HC walls on the INSIDE face of the posts (bottom edge clamped behind the kick board) ----------
 meshPanel(E,[48,0,3.6],[140.5,0,0],[0,48,0],3);meshPanel(E,[48,48,3.6],[140.5,0,0],[0,36,0],3);            // z=0 side (run): 48" lower + 36" upper course
-meshPanel(E,[87,0,92.4],[101.5,0,0],[0,48,0],3);meshPanel(E,[87,48,92.4],[101.5,0,0],[0,36,0],3); // z=96 side (gate gap 48..84, latch stud 84..87)
+meshPanel(E,[94.25,0,92.4],[94.25,0,0],[0,48,0],3);meshPanel(E,[94.25,48,92.4],[94.25,0,0],[0,36,0],3); // z=96 side: post C -> low end (the gate fills the whole bay post B -> post C, no latch stud)
 meshPanel(E,[188.4,0,3.5],[0,0,89],[0,48,0],3);meshPanel(E,[188.4,48,3.5],[0,0,89],[0,rb(191.25)+BD-48,0],3);   // low end
 // coop end: HC below the coop (slab -> floor framing) on 3 sides; the coop's walls are the enclosure from 27" to 75", and 1/2" HC closes 75" -> beams/purlins on all 4 sides (no ceiling, no T1-11 fill: open to the metal, fully ventilated)
 meshPanel(E,[3.6,0,3.5],[0,0,89],[0,FB0,0],3);                                               // front, below the floor beam
@@ -1588,18 +1606,19 @@ for(const z of [3.6,92.4])meshPanel(E,[5,0,z],[38,0,0],[0,FB1,0],3);            
   const L=[];for(let x=x0;x<=x1+0.01;x+=HS)L.push(x,yb,zp,x,rb(x),zp);for(let y=yb;y<rb(x0);y+=HS){const xe=Math.min(x1,(HI-y)*LEN/(HI-LO));L.push(x0,y,zp,xe,y,zp);}lineSeg(E,L);
   quad(E,[[x0,rb(x0)-0.05,zp],[x1,rb(x1)-0.05,zp],[x1,rb(x1)-0.05,zf],[x0,rb(x0)-0.05,zf]],mat.mesh);
   for(let x=7;x<=43;x+=12){wsh(x,CT-0.75,zp+(zp<48?0.1:-0.1),'z');wsh(x,rb(x)-0.12,(zp+zf)/2,'y');}}}
-// latch stud (doubled 2x4) + gate
-box(E,84,87,0,rb(87),92.5,96,mat.pt);
+// RUN GATE: fills the whole bay between post B (x=44.5..48, hinge) and post C (x=94.25..97.75, latch) - 46-1/4" clear, no latch stud.
+// Single leaf 45" wide (3/4" hinge gap, 1/2" latch gap): 2x4 frame, bottom + mid + sloped top rail, a 2x4 diagonal brace in each panel running from the
+// lower HINGE-side corner up to the upper LATCH-side corner (compression - holds the latch corner up), 3 heavy 10" T-strap hinges on post B, hasp + carabiner + spring barrel bolt into post C.
 const DOORS=[];
-{const G=new THREE.Group();G.position.set(48.75*IN,0,96*IN);E.add(G);const gt=7,W=35,hH=rb(48.75)-0.5-gt,hL=rb(83.75)-0.5-gt,ym=gt+48;
- // gate leaf 35 wide: hinge stile 72-1/2, latch stile 70-1/4, top rail follows the roof slope (1/2" under the beam), mid rail at the HC seam (48")
+{const G=new THREE.Group();G.position.set(48.75*IN,0,96*IN);E.add(G);const gt=7,W=45,hH=rb(48.75)-0.5-gt,hL=rb(48.75+W)-0.5-gt,ym=gt+48;
  box(G,0,1.5,gt,gt+hH,-3.5,0,mat.pt);box(G,W-1.5,W,gt,gt+hL,-3.5,0,mat.pt);box(G,1.5,W-1.5,gt,gt+3.5,-3.5,0,mat.pt);box(G,1.5,W-1.5,ym-1.75,ym+1.75,-3.5,0,mat.pt);
  {const L=(W-3)/Math.cos(SL),tr=box(G,-L/2,L/2,-3.5,0,-3.5,0,mat.pt);tr.position.set(W/2*IN,(gt+(hH+hL)/2)*IN,-1.75*IN);tr.rotation.z=-SL;}
  for(const [ya,yb] of [[gt+3.5,ym-1.75],[ym+1.75,gt+hL-3.5]]){const dx=W-3,L=Math.hypot(dx,yb-ya),b=box(G,-L/2,L/2,-0.75,0.75,-3.5,0,mat.pt);b.position.set((1.5+dx/2)*IN,(ya+yb)/2*IN,-1.75*IN);b.rotation.z=Math.atan2(yb-ya,dx);}
  meshPanel(G,[0,gt,0.1],[W,0,0],[0,48,0],3);quad(G,[[0,ym,0.1],[W,ym,0.1],[W,gt+hL,0.1],[0,gt+hH,0.1]],mat.mesh);
- for(const y of [gt+8,gt+hL-8])box(G,-3,7,y-0.6,y+0.6,0.1,0.35,M(0x222222));
+ const HB=M(0x222222);for(const y of [gt+7,ym,gt+hH-7]){box(G,0.3,10,y-0.7,y+0.7,0.1,0.35,HB);box(G,0.3,1.2,y-1.1,y+1.1,0.1,0.4,HB);   // 10" strap on the gate
+  box(E,45,47.9,y-2.75,y+2.75,96.05,96.3,HB);cylG(E,0.3,5.5,48.3,y,96.25,mat.galv);}                                          // T leaf on post B + pin
  G.userData={closed:0,open:-1.35};DOORS.push(G);
- hasp([85.5,44,96.1],[0,0,1],[-1,0,0],2.4,0.25,G,1.0);}
+ hasp([96,44,96.1],[0,0,1],[-1,0,0],2.9,0.25,G,1.0);}
 // ---------- ROOF (all roof-tagged): 9 PT 2x4 purlins across the width @24" OC on edge, H2.5A ties, 2x4 blocking over the beams, Terry's 4 panels ----------
 const PUR=[0.75,24,48,72,96,120,144,168,191.25];
 {for(const xc of PUR){sbox(E,xc-0.75,xc+0.75,BD,BD+PD,-18,114,mat.pt);   // on edge, bottom on the beam tops, top = metal underside (rm)
@@ -1617,8 +1636,8 @@ RFg(E,()=>{
  {const WC=M(0xd8dde0,{metalness:0.8,roughness:0.25});
   for(const [xf,xw] of [[-0.45,-0.6],[192.45,192.6]]){const y0=rm(xf<96?0:192);meshPanel(E,[xf,y0-3,-19.5],[0,0,135],[0,3.75,0],1.5);
    for(let z=-19;z<=115.5;z+=7.94)cylG(E,0.5,0.14,xw,y0-1.5,z,WC,0,Math.PI/2);}}});
-// ---------- FEED: Behrens 20 gal galvanized steel can (18" dia x 26-1/2") with 4 Infinity locking lid clips, on the slab outside the run beside the gate, 2 bungees to the run post/latch stud; lid = FLID ----------
-let FLID;{const cx=106,cz=107.5,GV=M(0xb9c0c4,{metalness:0.55,roughness:0.4});cylG(E,9,24.75,cx,12.6,cz,GV);for(const y of [1.2,8.5,16.5,24.6])cylG(E,9.15,0.5,cx,y,cz,GV);
+// ---------- FEED: Behrens 20 gal galvanized steel can (18" dia x 26-1/2") with 4 Infinity locking lid clips, on the slab outside the run past post C, clear of the gate swing (gate tip passes ~10" away), 2 bungees to post C; lid = FLID ----------
+let FLID;{const cx=112,cz=107.5,GV=M(0xb9c0c4,{metalness:0.55,roughness:0.4});cylG(E,9,24.75,cx,12.6,cz,GV);for(const y of [1.2,8.5,16.5,24.6])cylG(E,9.15,0.5,cx,y,cz,GV);
  for(const z of [-1,1])box(E,cx-0.5,cx+0.5,20,24.2,cz+z*9.05-0.25,cz+z*9.05+0.25,mat.galv);  // side handles
  FLID=new THREE.Group();FLID.position.set((cx+9.4)*IN,25*IN,cz*IN);E.add(FLID);cylG(FLID,9.4,1.5,-9.4,0.75,0,GV);box(FLID,-11,-7.8,1.5,2.4,-0.4,0.4,mat.galv);
  {const CL=M(0x222222);for(const z of [-1,1])box(E,cx-0.6,cx+0.6,23.4,26.3,cz+z*9.45-0.2,cz+z*9.45+0.2,CL);for(const x of [-1,1])box(E,cx+x*9.45-0.2,cx+x*9.45+0.2,23.4,26.3,cz-0.6,cz+0.6,CL);} // 4 Infinity locking lid clips
@@ -1714,8 +1733,8 @@ L1('SLAB 8x16: coop raised 30" over a full-length sand run, one roof',96,118,48,
 LR('Terry\'s 4 panels 3\'x17\'4" lengthwise, ribs downslope (owned, $0)',96,rm(96)+14,48,0.7);
 L1('HIGH end 7\'0" clear',-14,rb(0)+2,-14,0.6);L1('LOW end 6\'0" clear - drips off the slab edge',206,rb(192)-6,48,0.6);
 L1('coop 4x8 raised: floor 30", 3\'9" inside, clean-out doors face OUT',-30,60,48,0.65);
-L1('egg tray + nests (outside, by the gate)',24,46,116,0.6);L1('gate 3\' (high end of the long side)',66,88,112,0.6);
-L1('feed: 20 gal galvanized can, lid clips (on the slab)',106,32,128,0.55);L1('side hatch 16x14',14,54,-18,0.55);L1('pop door + fixed cleated ramp (~27 deg)',80,34,70,0.5);
+L1('egg tray + nests (outside, by the gate)',24,46,116,0.6);L1('gate 3\'9" post to post, braced, 3 T-strap hinges',70,88,112,0.6);
+L1('feed: 20 gal galvanized can, lid clips (on the slab)',114,32,128,0.55);L1('side hatch 16x14',14,54,-18,0.55);L1('pop door + fixed cleated ramp (~27 deg)',80,34,70,0.5);
 L1('2x8 PT kick board, 5" sand full 16\' (~2 cu yd)',120,14,-14,0.6);L1('2 weep notches (low end)',206,4,30,0.55);
 L1('open sand under the coop',26,12,48,0.55);L1('doubled 2x6 floor beams on the 4 corner posts (no mid posts / braces)',-14,20,76,0.5);
 L1('4x4 posts on ABA44Z bases, 1/2" wedge anchors',150,40,-16,0.6);L1('no ceiling: 1/2" HC from the wall tops to the roof, all 4 sides',24,84,-14,0.5);L1('HC over the coop: predator-tight + vented',-16,92,48,0.5);L1('painted Plytanium plywood walls, no vent holes',-10,62,70,0.5);L1('HC closure strips in the panel ribs (no foam)',-14,rm(0)+4,-24,0.5);
