@@ -1626,7 +1626,7 @@ let FLID;{const bx0=99,bx1=113,bz0=97.5,bz1=117.5,BIN=M(0x3a3d40,{roughness:0.6}
 // local x 0..96 = 8' length (x=0 NEST end -> world z=96, x=96 ROOST end -> world z=0); local z 0..48 (z=0 FRONT doors -> world x=0, z=48 back -> world x=48 = run side)
 const cg=new THREE.Group();cg.rotation.y=Math.PI/2;cg.position.set(0,R*IN,96*IN);E.add(cg);const c=cg; // whole coop raised R=24.25": floor top 30" above the slab
 const hc=makeHasp(cg);const t2=mat.t111.clone();t2.side=THREE.DoubleSide;
-const FT=5.75,BP=FT+1.5,TP=50.75,SB=2.75,VY0=TP-6,VY1=TP-2; // local: floor top 5.75 (30" world), top plate 50.75 -> 45" floor-to-ceiling; siding from 2.75
+const FT=5.75,BP=FT+1.5,TP=50.75,SB=2.75; // local: floor top 5.75 (30" world), top plate 50.75 -> 45" floor-to-ceiling; siding from 2.75
 // FLOOR: rims + 7 joists sitting on the 2 doubled 2x6 floor beams (inner layers at local z 3.5..5 and 43..44.5), solid blocking over the beams, 1 sheet PT ply
 for(const z of [0,46.5])box(c,3.5,92.5,1.5,5,z,z+1.5,mat.pt);
 {const J=[3.5,16,32,48,64,80,91];for(const x of J)box(c,x,x+1.5,1.5,5,1.5,46.5,mat.pt);
@@ -1641,14 +1641,12 @@ for(const x of [0,92.5])box(c,x,x+3.5,BP,TP-1.5,23.25,24.75,mat.pt);         // 
 // (no ceiling joists: end walls and the corner posts bolted to the beams tie the top plates; HC above; nothing for hens to roost on up high)
 const PY0=BP,PY1=BP+13;box(c,23.25,38.25,PY1,PY1+1.5,44.5,48,mat.pt);           // pop door header (opening x 24.75..36.75)
 box(c,92.5,96,BP,BP+1.5,3.5,23.25,mat.pt);box(c,92.5,96,22.75,24.25,3.5,23.25,mat.pt); // side hatch framing (roost end)
-// NO CEILING: the coop is open to the metal (85% reflective coating); HC-backed vent slots high in the back + end walls + 1/2" HC from the top plates to the roof on all 4 sides
-for(const [a0,a1] of [[5,22.75],[49.5,69.5],[72,91]])meshPanel(c,[a0,VY0,48.3],[a1-a0,0,0],[0,4,0],1.5);
-for(const xw of [-0.3,96.3])for(const [a0,a1] of [[5,21],[27,43]])meshPanel(c,[xw,VY0,a0],[0,0,a1-a0],[0,4,0],1.5);
+// NO CEILING: the coop is open to the metal (85% reflective coating); ventilation = the 1/2" HC from the top plates to the roof on all 4 sides (no vent slots cut in the walls - siding is solid to the top plate)
 // SIDING: painted T1-11
 const ys0=10.2,ys1=13.2;
-skin(c,'x',48.6,-0.6,96.6,SB,()=>TP,[[24.75,36.75,PY0,PY1],[5,22.75,VY0,VY1],[49.5,69.5,VY0,VY1],[72,91,VY0,VY1]],t2);   // back (run side): pop door + 3 vent slots
-skin(c,'z',-0.6,-0.6,48.6,SB,()=>TP,[[9,23,ys0,ys1],[25,39,ys0,ys1],[5,21,VY0,VY1],[27,43,VY0,VY1]],t2);           // nest end: egg slots + 2 vents
-skin(c,'z',96.6,-0.6,48.6,SB,()=>TP,[[5,21,8.75,22.75],[5,21,VY0,VY1],[27,43,VY0,VY1]],t2);                       // roost end: side hatch + 2 vents
+skin(c,'x',48.6,-0.6,96.6,SB,()=>TP,[[24.75,36.75,PY0,PY1]],t2);   // back (run side): pop door only, solid to the top plate
+skin(c,'z',-0.6,-0.6,48.6,SB,()=>TP,[[9,23,ys0,ys1],[25,39,ys0,ys1]],t2);           // nest end: egg slots only, solid to the top plate
+skin(c,'z',96.6,-0.6,48.6,SB,()=>TP,[[5,21,8.75,22.75]],t2);                       // roost end: side hatch only, solid to the top plate
 for(const [x0,x1,z0,z1] of [[-1.35,-0.6,48,48.75],[96.6,97.35,48,48.75]])box(c,x0,x1,SB,TP,z0,z1,mat.trim);
 // FRONT: 2 clean-out doors 47-1/4 x 48 facing OUT onto the slab apron, bottom edge 27" off the slab (wheelbarrow height) (1x4 Z-brace, 3 tee hinges each), hasp + snap to the center post
 for(const side of [0,1]){const d=new THREE.Group();d.position.set((side?96:0)*IN,0,-0.6*IN);cg.add(d);const s=side?-1:1;
