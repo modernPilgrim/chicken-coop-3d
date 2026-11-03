@@ -4,7 +4,7 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #title{font-weight:bold;margin-bottom:6px}button{margin:2px;padding:6px 10px;border:1px solid #888;border-radius:5px;background:#f4f4f4;font-size:14px}button.on{background:#2d6;color:#fff;border-color:#1a4}
 #hint{font-size:12px;color:#444;margin-top:4px}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}</style></head><body>
 <div id="ui"><button id="mbtn" onclick="toggleMenu()">– Hide menu</button><div id="menuBody"><div id="title"></div>
-<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop doors</button><button onclick="setView('inside')">Inside</button><button onclick="setView('nests')">Nests / egg tray</button><button onclick="setView('roost')">Roost</button><button onclick="setView('run')">Run</button><button onclick="setView('feed')">Feeder / water</button><button onclick="setView('roostend')">Roost end</button><button onclick="setView('gate')">Gate side</button><button onclick="setView('under')">Under coop</button><button onclick="setView('roofdetail')">Roof detail</button><button onclick="setView('coophc')">Coop top HC</button><button onclick="setView('top')">Top</button><button onclick="setView('noroof')">No roof (top)</button>
+<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop doors</button><button onclick="setView('inside')">Inside</button><button onclick="setView('nests')">Nests / egg tray</button><button onclick="setView('roost')">Roost</button><button onclick="setView('run')">Run</button><button onclick="setView('feed')">Feeder / water</button><button onclick="setView('roostend')">Roost end</button><button onclick="setView('gate')">Gate side</button><button onclick="setView('seam')">Seam rail</button><button onclick="setView('under')">Under coop</button><button onclick="setView('roofdetail')">Roof detail</button><button onclick="setView('coophc')">Coop top HC</button><button onclick="setView('top')">Top</button><button onclick="setView('noroof')">No roof (top)</button>
 <button onclick="toggleLabels()">Labels</button><button id="rbtn" onclick="toggleRoof()">Roof: on</button><button id="dbtn" onclick="toggleDoors()">Doors</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. 1 grid square = 1 ft. <a href="index.html">Full design</a> · <a href="budget.html">Budget</a> · <a href="compact.html">Compact</a> · <a href="stationary.html">Stationary</a> · <a href="grainbin.html">Grain bin</a> · <a href="reachin.html">Reach-in</a></div></div></div><script>(function(){var K='coopMenuCollapsed',ui=document.getElementById('ui'),mb=document.getElementById('menuBody'),b=document.getElementById('mbtn');function set(c,save){mb.style.display=c?'none':'';ui.classList.toggle('collapsed',c);b.textContent=c?'☰ Menu':'– Hide menu';if(save){try{localStorage.setItem(K,c?'1':'0')}catch(e){}}}window.toggleMenu=function(){set(mb.style.display!=='none',true)};var q=new URLSearchParams(location.search).get('menu'),s=null;try{s=localStorage.getItem(K)}catch(e){}set(q?/^(closed|collapsed|0|min|hide)$/.test(q):(s!==null?s==='1':innerWidth<700),false);})();</script>
 <script>
@@ -1442,9 +1442,9 @@ const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughnes
 const mat={wood:M(0xc89a5c),pt:M(0xa8875a),skid:M(0x8a6a3e),sid:M(0xcbbf9f)/* painted Plytanium plywood siding */,trim:M(0xe8dcc4),
  metal:M(0xbfc5c9,{metalness:0.7,roughness:0.35,side:THREE.DoubleSide}),galv:M(0x9aa2a8,{metalness:0.8,roughness:0.3}),
  tire:M(0x1b1b1b),hub:M(0x888888,{metalness:0.6}),solar:M(0x1a2a55,{metalness:0.3,roughness:0.2}),
- mesh:new THREE.MeshStandardMaterial({color:0x8d969c,metalness:0.6,roughness:0.5,transparent:true,opacity:0.22,side:THREE.DoubleSide,depthWrite:false}),
+ mesh:new THREE.MeshStandardMaterial({color:0x111111,metalness:0.05,roughness:0.95,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false}), /* 1/2" HC rolled flat black (Valspar DTM acrylic) - matte, still see-through */
  door:M(0xd6b07a),ply:M(0xf0e6c8),nest:M(0xc49a64),ramp:M(0x9b7a50),person:M(0x4a6fa5),skin:M(0xe0b090),straw:M(0xd8c070)};
-const meshLine=new THREE.LineBasicMaterial({color:0x6d757a,transparent:true,opacity:0.55});
+const meshLine=new THREE.LineBasicMaterial({color:0x0b0b0b,transparent:true,opacity:0.6}); // black-painted HC wires
 function box(g,x0,x1,y0,y1,z0,z1,m){const b=new THREE.Mesh(new THREE.BoxGeometry((x1-x0)*IN,(y1-y0)*IN,(z1-z0)*IN),m);
  b.position.set((x0+x1)/2*IN,(y0+y1)/2*IN,(z0+z1)/2*IN);b.castShadow=b.receiveShadow=true;g.add(b);return b;}
 // mesh panel in plane: rectangle defined by origin + two edge vectors (inches), grid spacing s
@@ -1586,9 +1586,16 @@ box(E,187,188.4,0.75,7.25,3.6,92.4,mat.pt);for(const [a,b] of [[3.6,29],[31,65],
 box(E,3.6,5.1,0,7.25,5.1,90.9,mat.pt); // high end, inside the coop-end posts (under the coop)
 box(E,5.1,187,0,5,5.1,90.9,SAND);    // full-length sand, open under the coop
 // ---------- 1/2" HC walls on the INSIDE face of the posts (bottom edge clamped behind the kick board) ----------
-meshPanel(E,[48,0,3.6],[140.5,0,0],[0,48,0],3);meshPanel(E,[48,48,3.6],[140.5,0,0],[0,36,0],3);            // z=0 side (run): 48" lower + 36" upper course
-meshPanel(E,[94.25,0,92.4],[94.25,0,0],[0,48,0],3);meshPanel(E,[94.25,48,92.4],[94.25,0,0],[0,36,0],3); // z=96 side: post C -> low end (the gate fills the whole bay post B -> post C, no latch stud)
-meshPanel(E,[188.4,0,3.5],[0,0,89],[0,48,0],3);meshPanel(E,[188.4,48,3.5],[0,0,89],[0,rb(191.25)+BD-48,0],3);   // low end
+// 36" roll = BOTTOM course (slab 0 -> 36", clamped behind the kick board), 48" roll = TOP course (34-1/2" -> 82-1/2", 1-1/2" lap on the seam rail; reaches 1-1/2" up the beam at post B x=48 where the beam underside is 81", more everywhere downslope)
+// SEAM RAIL: PT 2x4 on edge between the posts, inner face flush with the posts, 32-1/2" -> 36" (top = the 36" course edge, 27-1/2" above the 5" of sand - easy to see over);
+// both courses stapled to the rail, PT 1x2 batten screwed over the lap (#8 x 1-1/4" deck screws ~12" OC). No hog rings.
+const RY0=32.5,RY1=36,HY0=34.5,BT0=34.56,BT1=35.94;
+meshPanel(E,[48,0,3.6],[140.5,0,0],[0,RY1,0],3);meshPanel(E,[48,HY0,3.6],[140.5,0,0],[0,48,0],3);            // z=0 side (run): 36" bottom + 48" top course
+meshPanel(E,[94.25,0,92.4],[94.25,0,0],[0,RY1,0],3);meshPanel(E,[94.25,HY0,92.4],[94.25,0,0],[0,48,0],3); // z=96 side: post C -> low end (the gate fills the whole bay post B -> post C, no latch stud)
+meshPanel(E,[188.4,0,3.5],[0,0,89],[0,RY1,0],3);meshPanel(E,[188.4,HY0,3.5],[0,0,89],[0,rb(191.25)+BD-HY0,0],3);   // low end (48" course trimmed to 43-1/4" at the end top rail)
+for(const [a,b] of [[48,94.25],[97.75,142.25],[145.75,188.5]]){box(E,a,b,RY0,RY1,2,3.5,mat.pt);box(E,a,b,BT0,BT1,3.65,4.275,mat.pt);}        // z=0 side: 3 rails + battens
+for(const [a,b] of [[97.75,142.25],[145.75,188.5]]){box(E,a,b,RY0,RY1,92.5,94,mat.pt);box(E,a,b,BT0,BT1,91.725,92.35,mat.pt);}             // z=96 side: 2 rails + battens (gate bay: the gate mid rail)
+for(const [a,b] of [[3.5,47.25],[48.75,92.5]]){box(E,188.5,190,RY0,RY1,a,b,mat.pt);box(E,187.725,188.35,BT0,BT1,a,b,mat.pt);}              // low end: 2 rails + battens (either side of the end mid stud)
 // coop end: HC below the coop (slab -> floor framing) on 3 sides; the coop's walls are the enclosure from 27" to 75", and 1/2" HC closes 75" -> beams/purlins on all 4 sides (no ceiling, no T1-11 fill: open to the metal, fully ventilated)
 meshPanel(E,[3.6,0,3.5],[0,0,89],[0,FB0,0],3);                                               // front, below the floor beam
 for(const z of [3.6,92.4])meshPanel(E,[5,0,z],[38,0,0],[0,FB1,0],3);                          // both long sides, below the coop end walls
@@ -1610,11 +1617,12 @@ for(const z of [3.6,92.4])meshPanel(E,[5,0,z],[38,0,0],[0,FB1,0],3);            
 // Single leaf 45" wide (3/4" hinge gap, 1/2" latch gap): 2x4 frame, bottom + mid + sloped top rail, a 2x4 diagonal brace in each panel running from the
 // lower HINGE-side corner up to the upper LATCH-side corner (compression - holds the latch corner up), 3 heavy 10" T-strap hinges on post B, hasp + carabiner + spring barrel bolt into post C.
 const DOORS=[];
-{const G=new THREE.Group();G.position.set(48.75*IN,0,96*IN);E.add(G);const gt=7,W=45,hH=rb(48.75)-0.5-gt,hL=rb(48.75+W)-0.5-gt,ym=gt+48;
+{const G=new THREE.Group();G.position.set(48.75*IN,0,96*IN);E.add(G);const gt=7,W=45,hH=rb(48.75)-0.5-gt,hL=rb(48.75+W)-0.5-gt,ym=34.25; // mid rail 32-1/2..36 = same height as the run seam rail
  box(G,0,1.5,gt,gt+hH,-3.5,0,mat.pt);box(G,W-1.5,W,gt,gt+hL,-3.5,0,mat.pt);box(G,1.5,W-1.5,gt,gt+3.5,-3.5,0,mat.pt);box(G,1.5,W-1.5,ym-1.75,ym+1.75,-3.5,0,mat.pt);
  {const L=(W-3)/Math.cos(SL),tr=box(G,-L/2,L/2,-3.5,0,-3.5,0,mat.pt);tr.position.set(W/2*IN,(gt+(hH+hL)/2)*IN,-1.75*IN);tr.rotation.z=-SL;}
  for(const [ya,yb] of [[gt+3.5,ym-1.75],[ym+1.75,gt+hL-3.5]]){const dx=W-3,L=Math.hypot(dx,yb-ya),b=box(G,-L/2,L/2,-0.75,0.75,-3.5,0,mat.pt);b.position.set((1.5+dx/2)*IN,(ya+yb)/2*IN,-1.75*IN);b.rotation.z=Math.atan2(yb-ya,dx);}
- meshPanel(G,[0,gt,0.1],[W,0,0],[0,48,0],3);quad(G,[[0,ym,0.1],[W,ym,0.1],[W,gt+hL,0.1],[0,gt+hH,0.1]],mat.mesh);
+ meshPanel(G,[0,gt,0.1],[W,0,0],[0,36-gt,0],3);quad(G,[[0,34.5,0.1],[W,34.5,0.1],[W,gt+hL,0.1],[0,gt+hH,0.1]],mat.mesh); // 36" roll piece below the mid rail, 48" roll piece above
+ box(G,1.5,W-1.5,34.56,35.94,0.15,0.775,mat.pt);   // 1x2 batten over the HC lap on the mid rail
  const HB=M(0x222222);for(const y of [gt+7,ym,gt+hH-7]){box(G,0.3,10,y-0.7,y+0.7,0.1,0.35,HB);box(G,0.3,1.2,y-1.1,y+1.1,0.1,0.4,HB);   // 10" strap on the gate
   box(E,45,47.9,y-2.75,y+2.75,96.05,96.3,HB);cylG(E,0.3,5.5,48.3,y,96.25,mat.galv);}                                          // T leaf on post B + pin
  G.userData={closed:0,open:-1.35};DOORS.push(G);
@@ -1671,22 +1679,28 @@ box(c,3.5,92.5,5,FT,0,48,mat.ply);box(c,0,3.5,5,FT,3.5,44.5,mat.ply);box(c,92.5,
 box(c,3.5,92.5,FT,BP,0,3.5,mat.pt);box(c,3.5,92.5,FT,BP,44.5,48,mat.pt);for(const x of [0,92.5])box(c,x,x+3.5,FT,BP,3.5,44.5,mat.pt);
 box(c,3.5,92.5,TP-1.5,TP,0,3.5,mat.pt);box(c,3.5,92.5,TP-1.5,TP,44.5,48,mat.pt);for(const x of [0,92.5])box(c,x,x+3.5,TP-1.5,TP,3.5,44.5,mat.pt);
 box(c,47.25,48.75,BP,TP-1.5,0,3.5,mat.pt);                                   // front center post (door hasps)
-for(const x of [23.25,36.75,47.25,70])box(c,x,x+1.5,BP,TP-1.5,44.5,48,mat.pt);  // back studs
-for(const x of [0,92.5])box(c,x,x+3.5,BP,TP-1.5,23.25,24.75,mat.pt);         // end mid studs
+for(const x of [15.25,24.5,38,47.25,63.25,79.25])box(c,x,x+1.5,BP,TP-1.5,44.5,48,mat.pt);  // back studs: 16 in. OC max for the 8 in. OC T1-11 (16/48/64/80 on grooves/seam; 24.5 + 38 = pop-door jambs)
+// end-wall studs at 16 + 32 in. (16 in. OC for the T1-11, on the grooves); nest end: split around the 3 in. egg slots (block below + cripple above) so eggs roll through
+for(const z of [15.25,31.25]){box(c,92.5,96,BP,TP-1.5,z,z+1.5,mat.pt);box(c,0,3.5,BP,10.2,z,z+1.5,mat.pt);box(c,0,3.5,13.2,TP-1.5,z,z+1.5,mat.pt);}
 // (no ceiling joists: end walls and the corner posts bolted to the beams tie the top plates; HC above; nothing for hens to roost on up high)
-const PY0=BP,PY1=BP+13;box(c,23.25,38.25,PY1,PY1+1.5,44.5,48,mat.pt);           // pop door header (opening x 24.75..36.75)
+const PY0=BP,PY1=BP+13;box(c,24.5,39.5,PY1,PY1+1.5,44.5,48,mat.pt);           // pop door header (opening x 26..38, centered on the x=32 T1-11 groove, 2 in. clear of the grooves at 24 and 40)
 // roost end wall: NO side hatch (removed) - plain wall, corner posts + end mid stud only; roost + droppings board are reached through the 2 front clean-out doors
 // NO CEILING: the coop is open to the metal (85% reflective coating); ventilation = the 1/2" HC from the top plates to the roof on all 4 sides (no vent slots cut in the walls - siding is solid to the top plate)
-// SIDING: untreated Plytanium 15/32 plywood (smooth, no grooves), primed + painted all faces and edges
+// SIDING: LP SmartSide 76 Series 7/16 T1-11 panel, 8 in. OC grooves (vertical), factory primed + painted; grooves every 8 in. from each sheet edge (sheet seams = shiplap joints that read as grooves)
+const GRV=M(0x8a7f63);
+const grooves=(g,axis,c,pos,yb,ytop,holes)=>{for(const a of pos)skin(g,axis,c,a-0.1875,a+0.1875,yb,ytop,holes,GRV);};
 const ys0=10.2,ys1=13.2;
-skin(c,'x',48.6,-0.6,96.6,SB,()=>TP,[[24.75,36.75,PY0,PY1]],t2);   // back (run side): pop door only, solid to the top plate
+skin(c,'x',48.6,-0.6,96.6,SB,()=>TP,[[26,38,PY0,PY1]],t2);   // back (run side): pop door only, solid to the top plate
+grooves(c,'x',48.66,[8,16,24,32,40,48,56,64,72,80,88],SB,()=>TP,[[26,38,PY0,PY1]]);   // 2 sheets, seam at 48 on the center stud
 skin(c,'z',-0.6,-0.6,48.6,SB,()=>TP,[[9,23,ys0,ys1],[25,39,ys0,ys1]],t2);           // nest end: egg slots only, solid to the top plate
+grooves(c,'z',-0.66,[8,16,24,32,40],SB,()=>TP,[[9,23,ys0,ys1],[25,39,ys0,ys1]]);
 skin(c,'z',96.6,-0.6,48.6,SB,()=>TP,[],t2);                                        // roost end: SOLID to the top plate (no hatch, no openings)
+grooves(c,'z',96.66,[8,16,24,32,40],SB,()=>TP,[]);
 for(const [x0,x1,z0,z1] of [[-1.35,-0.6,48,48.75],[96.6,97.35,48,48.75]])box(c,x0,x1,SB,TP,z0,z1,mat.trim);
 // FRONT: 2 clean-out doors 47-1/4 x 48 facing OUT onto the slab apron, bottom edge 27" off the slab (wheelbarrow height) (1x4 Z-brace, 3 tee hinges each), hasp + carabiner + spring barrel bolt to the center post
 for(const side of [0,1]){const d=new THREE.Group();d.position.set((side?96:0)*IN,0,-0.6*IN);cg.add(d);const s=side?-1:1;
  const xa=(v)=>s*v;const bx=(a,b,y0,y1,z0,z1,m)=>box(d,Math.min(xa(a),xa(b)),Math.max(xa(a),xa(b)),y0,y1,z0,z1,m);
- bx(0,47.25,SB,TP,-0.6,0,mat.sid);
+ bx(0,47.25,SB,TP,-0.6,0,mat.sid);for(const gx of [8,16,24,32,40])bx(gx-0.1875,gx+0.1875,SB,TP,-0.66,-0.6,GRV);   // T1-11 door skin: grooves 8 in. OC from the hinge edge, 7-1/4 in. groove-free at the latch edge
  for(const y of [9.25,43.25])bx(4.25,45.5,y,y+3.5,0,0.75,mat.pt);
  {const L=Math.hypot(38.5,30),zb=box(d,-L/2,L/2,-1.75,1.75,0,0.75,mat.pt);zb.position.set(xa(24.9)*IN,28*IN,0.375*IN);zb.rotation.z=s*Math.atan2(30,38.5);}
  for(const y of [7.25,26.75,46.25])bx(-1,9,y-0.6,y+0.6,-0.8,-0.6,M(0x222222));
@@ -1723,11 +1737,11 @@ let TLID;{const z0=48.6,z1=56.1,y0=7,x0=8,x1=40;box(ng,x0,x1,y0-3.5,y0,48.6,50.1
  TLID.userData={closed:-Math.atan2(15.5-(y0+5.7),8.2),open:1.15};TLID.rotation.z=TLID.userData.closed;
  hn([(x0+x1)/2,y0+2,z1],[0,0,1],[0,1,0],1.6,0.1,TLID,0.6);}
 // POP DOOR into the run (back wall, sill 31-1/2" above the slab): vertical slide in 1x2 guides, spring barrel bolt holds it shut; FIXED cleated ramp down to the sand
-{const p={c:48.6,a0:24.75,a1:36.75};box(c,p.a0-1.4,p.a0-0.1,PY0-0.5,PY1+14,p.c,p.c+0.75,mat.pt);box(c,p.a1+0.1,p.a1+1.4,PY0-0.5,PY1+14,p.c,p.c+0.75,mat.pt);
+{const p={c:48.6,a0:26,a1:38};box(c,p.a0-1.4,p.a0-0.1,PY0-0.5,PY1+14,p.c,p.c+0.75,mat.pt);box(c,p.a1+0.1,p.a1+1.4,PY0-0.5,PY1+14,p.c,p.c+0.75,mat.pt);
  box(c,p.a0-1,p.a1+1,PY1,PY1+14,p.c+0.75,p.c+1.35,mat.sid);}
 // ---------- RAMP (FIXED): 2 PT 1x6 x 56" side by side (11" wide), 9 1x2 cleats @ 6" OC, 3 1x6 battens under; top end screwed to a flat 2x4 ledger just under the sill
 // (#10 x 3" through the top batten), foot rests on the sand at ~27 deg. No hinges, rope or cleat: the pop-door slide is the night closure ----------
-let RAMP;{const RL=56,yp=R+BP,zp=96-30.75;box(E,48.6,52.1,yp-2.25,yp-0.75,zp-8,zp+8,mat.pt);
+let RAMP;{const RL=56,yp=R+BP,zp=96-32;box(E,48.6,52.1,yp-2.25,yp-0.75,zp-8,zp+8,mat.pt);
  RAMP=new THREE.Group();RAMP.position.set(52.1*IN,yp*IN,zp*IN);E.add(RAMP);
  for(const [z0,z1] of [[-5.5,-0.03],[0.03,5.5]])box(RAMP,0,RL,-0.75,0,z0,z1,mat.ramp);
  for(let x=3;x<RL-2;x+=6)box(RAMP,x,x+1.375,0,0.625,-5.5,5.5,mat.pt);
@@ -1744,12 +1758,12 @@ L1('egg tray + nests (outside, by the gate)',24,46,116,0.6);L1('gate 3\'9" post 
 L1('feed: 20 gal galvanized can, lid clips (on the slab)',114,32,128,0.55);L1('roost end wall solid (no hatch): roost + droppings board via the front doors',14,58,-18,0.5);L1('pop door + fixed cleated ramp (~27 deg)',80,34,70,0.5);L1('feeder (pan 5" off sand) + nipple bucket (14") on chain from the x=120 purlin',126,46,66,0.5);
 L1('2x8 PT kick board, 5" sand full 16\' (~2 cu yd)',120,14,-14,0.6);L1('2 weep notches (low end)',206,4,30,0.55);
 L1('open sand under the coop',26,12,48,0.55);L1('doubled 2x6 floor beams on the 4 corner posts (no mid posts / braces)',-14,20,76,0.5);
-L1('4x4 posts on ABA44Z bases, 1/2" wedge anchors',150,40,-16,0.6);L1('no ceiling: 1/2" HC from the wall tops to the roof, all 4 sides',24,84,-14,0.5);L1('HC over the coop: predator-tight + vented',-16,92,48,0.5);L1('painted Plytanium plywood walls, no vent holes',-10,62,70,0.5);L1('HC closure strips in the panel ribs (no foam)',-14,rm(0)+4,-24,0.5);
+L1('4x4 posts on ABA44Z bases, 1/2" wedge anchors',150,40,-16,0.6);L1('no ceiling: 1/2" HC (painted black) from the wall tops to the roof, all 4 sides',24,84,-14,0.5);L1('2x4 seam rail at 36": black HC 36" below / 48" above, 1x2 batten over the lap',100,30,-14,0.55);L1('HC over the coop: predator-tight + vented',-16,92,48,0.5);L1('painted T1-11 siding (LP SmartSide 8" OC), no vent holes',-10,62,70,0.5);L1('HC closure strips in the panel ribs (no foam)',-14,rm(0)+4,-24,0.5);
 dim(g,[0,S,-26],[192,S,-26],"16'",[0,5,0]);dim(g,[204,S,0],[204,S,96],"8'",[0,5,0]);
 dim(g,[-10,S,-4],[-10,S+rb(0),-4],"7'",[0,0,-8]);dim(g,[200,S,-4],[200,S+rb(192),-4],"6'",[0,0,8]);
 dim(g,[-6,S,-10],[-6,S+30,-10],'floor 30"',[0,0,-8]);dim(g,[-6,S+30,-10],[-6,S+75,-10],'3\'9" inside',[0,0,-8]);
 scene.add(g);
-const VIEWS={overview:[[-11,12,22],[8,3,5]],mobile:[[-30,44,16],[9,0.5,4.5]],coop:[[-10,7,9],[2,4.3,4]],inside:[[-1.5,15,4.01],[2,3,4]],coopup:[[-3.5,12.5,0.5],[2.2,5.5,4.4]],coophc:[[-3.2,7.2,-2.6],[2.4,7.1,3.2]],
+const VIEWS={seam:[[12.9,4.3,4.6],[10.4,3.2,0.25]],overview:[[-11,12,22],[8,3,5]],mobile:[[-30,44,16],[9,0.5,4.5]],coop:[[-10,7,9],[2,4.3,4]],inside:[[-1.5,15,4.01],[2,3,4]],coopup:[[-3.5,12.5,0.5],[2.2,5.5,4.4]],coophc:[[-3.2,7.2,-2.6],[2.4,7.1,3.2]],
  nests:[[2.5,5.4,14],[2,3.4,8.4]],roost:[[-6.5,6.5,1.2],[2.5,5,1.6]],run:[[27,9,-7],[10,2.5,4]],feed:[[15.3,4.2,7.5],[9.4,3.7,4.9]],feedtop:[[13.2,4.4,5.5],[10,6.4,5.5]],roostend:[[-6.5,6.2,-8.5],[2.6,3.6,2.4]],gate:[[1,6.5,25],[6.5,3.6,7]],under:[[10.5,2.5,1.0],[2,1.7,5.2]],
  roofdetail:[[18.6,6.0,-3.0],[14.5,6.5,0.2]],top:[[8,44,4.01],[8,0,4]],noroof:[[8,22,17],[8,0,4]],noroofm:[[-6,31,4],[8.5,0,4]]};
 const CLIP={inside:[new THREE.Plane(new THREE.Vector3(0,-1,0),(S+R+46)*IN)]};
