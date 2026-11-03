@@ -4,7 +4,7 @@ body{margin:0;overflow:hidden;font-family:sans-serif}#ui{position:absolute;top:1
 #title{font-weight:bold;margin-bottom:6px}button{margin:2px;padding:6px 10px;border:1px solid #888;border-radius:5px;background:#f4f4f4;font-size:14px}button.on{background:#2d6;color:#fff;border-color:#1a4}
 #hint{font-size:12px;color:#444;margin-top:4px}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}#mbtn{font-weight:bold;background:#2d6;color:#fff;border-color:#1a4;padding:5px 10px;margin:0 0 4px 0}#ui.collapsed{padding:4px;background:rgba(255,255,255,.6)}#ui.collapsed #mbtn{margin:0}@media (max-width:700px){#ui{max-width:calc(100vw - 28px);max-height:62vh;overflow:auto}#ui button{font-size:12px;padding:4px 7px}#title{font-size:13px}}</style></head><body>
 <div id="ui"><button id="mbtn" onclick="toggleMenu()">– Hide menu</button><div id="menuBody"><div id="title"></div>
-<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop doors</button><button onclick="setView('inside')">Inside</button><button onclick="setView('nests')">Nests / egg tray</button><button onclick="setView('roost')">Roost</button><button onclick="setView('run')">Run</button><button onclick="setView('gate')">Gate side</button><button onclick="setView('under')">Under coop</button><button onclick="setView('roofdetail')">Roof detail</button><button onclick="setView('coophc')">Coop top HC</button><button onclick="setView('top')">Top</button><button onclick="setView('noroof')">No roof (top)</button>
+<button onclick="setView('overview')">Overview</button><button onclick="setView('coop')">Coop doors</button><button onclick="setView('inside')">Inside</button><button onclick="setView('nests')">Nests / egg tray</button><button onclick="setView('roost')">Roost</button><button onclick="setView('run')">Run</button><button onclick="setView('feed')">Feeder / water</button><button onclick="setView('roostend')">Roost end</button><button onclick="setView('gate')">Gate side</button><button onclick="setView('under')">Under coop</button><button onclick="setView('roofdetail')">Roof detail</button><button onclick="setView('coophc')">Coop top HC</button><button onclick="setView('top')">Top</button><button onclick="setView('noroof')">No roof (top)</button>
 <button onclick="toggleLabels()">Labels</button><button id="rbtn" onclick="toggleRoof()">Roof: on</button><button id="dbtn" onclick="toggleDoors()">Doors</button><button id="tbtn" onclick="toggleTray()">Egg tray</button><button id="fbtn" onclick="toggleFeed()">Feed lid</button>
 <div id="hint">Drag to orbit · scroll/pinch to zoom · right-drag/two-finger to pan. 1 grid square = 1 ft. <a href="index.html">Full design</a> · <a href="budget.html">Budget</a> · <a href="compact.html">Compact</a> · <a href="stationary.html">Stationary</a> · <a href="grainbin.html">Grain bin</a> · <a href="reachin.html">Reach-in</a></div></div></div><script>(function(){var K='coopMenuCollapsed',ui=document.getElementById('ui'),mb=document.getElementById('menuBody'),b=document.getElementById('mbtn');function set(c,save){mb.style.display=c?'none':'';ui.classList.toggle('collapsed',c);b.textContent=c?'☰ Menu':'– Hide menu';if(save){try{localStorage.setItem(K,c?'1':'0')}catch(e){}}}window.toggleMenu=function(){set(mb.style.display!=='none',true)};var q=new URLSearchParams(location.search).get('menu'),s=null;try{s=localStorage.getItem(K)}catch(e){}set(q?/^(closed|collapsed|0|min|hide)$/.test(q):(s!==null?s==='1':innerWidth<700),false);})();</script>
 <script>
@@ -1642,6 +1642,20 @@ let FLID;{const cx=112,cz=107.5,GV=M(0xb9c0c4,{metalness:0.55,roughness:0.4});cy
  FLID=new THREE.Group();FLID.position.set((cx+9.4)*IN,25*IN,cz*IN);E.add(FLID);cylG(FLID,9.4,1.5,-9.4,0.75,0,GV);box(FLID,-11,-7.8,1.5,2.4,-0.4,0.4,mat.galv);
  {const CL=M(0x222222);for(const z of [-1,1])box(E,cx-0.6,cx+0.6,23.4,26.3,cz+z*9.45-0.2,cz+z*9.45+0.2,CL);for(const x of [-1,1])box(E,cx+x*9.45-0.2,cx+x*9.45+0.2,23.4,26.3,cz-0.6,cz+0.6,CL);} // 4 Infinity locking lid clips
  FLID.userData={closed:0,open:-1.2};for(const y of [9,19])cylG(E,9.25,0.9,cx,y,cz,M(0x1f5fa8));}
+// ---------- FEEDER + WATERER IN THE RUN (moved out of the coop): both hung by 2/0 welded chain from screw hooks in the underside of the x=120 purlin
+// (purlin bottom rb(120)+BD = 82" above the slab top, sand top = 5"). Past the ramp foot (~x=102) and post C (gate latch, x=94.25..97.75), not under the coop;
+// one step in from the gate's latch side. Feeder (z=78) is right across the HC from the feed can; waterer (z=54) on the far side of it.
+// Harris Farms 15 lb galvanized feeder: 12" dia pan bottom 5" off the sand (y=10); 5-gal bucket with 3 horizontal nipples 14" off the sand (y=19).
+{const FX=120,yP=rb(FX)+BD,CH=M(0x9aa2a8,{metalness:0.7,roughness:0.35});
+ const chain=(x,z,y0)=>{cylG(E,0.22,yP-1.6-y0,x,(y0+yP-1.6)/2,z,CH);box(E,x-0.2,x+0.2,yP-1.6,yP,z-0.2,z+0.2,mat.galv);   // chain + screw hook in the purlin underside
+  cylG(E,0.5,0.25,x,yP-1.5,z,mat.galv,Math.PI/2);};
+ {const z=78,FG=M(0xc3c9cd,{metalness:0.2,roughness:0.55});cylG(E,6,1.2,FX,10.6,z,FG);cylG(E,4.5,13,FX,17.7,z,FG);cylG(E,5,0.8,FX,24.6,z,FG);   // pan, tube, lid (galvanized)
+  for(const s of [-1,1]){const b=box(E,-0.1,0.1,-1.9,1.9,-0.1,0.1,mat.galv);b.position.set(FX*IN,25.75*IN,(z+s*1.75)*IN);b.rotation.x=-s*Math.atan2(3.5,1.5);} // hanger bail, apex y=26.5
+  chain(FX,z,26.5);}
+ {const z=54,WB=M(0xf2f2ea);cylG(E,6,15,FX,24.5,z,WB);cylG(E,6.2,0.6,FX,32.3,z,WB);             // bucket (bottom y=17) + lid
+  for(const a of [0.6,2.7,4.8])cylG(E,0.35,1.2,FX+6.5*Math.cos(a),19,z+6.5*Math.sin(a),M(0xd03030),0,Math.PI/2); // nipples 14" off the sand
+  for(const s of [-1,1]){const b=box(E,-0.12,0.12,-3.31,3.31,-0.12,0.12,mat.galv);b.position.set(FX*IN,34*IN,(z+s*3)*IN);b.rotation.x=-s*Math.atan2(6,2.8);} // wire bail, apex at y=35.4
+  chain(FX,z,35.4);}}
 
 // ================= COOP (reach-in 4x8, roof removed - the big roof covers it), local inches like reachin.html =================
 // local x 0..96 = 8' length (x=0 NEST end -> world z=96, x=96 ROOST end -> world z=0); local z 0..48 (z=0 FRONT doors -> world x=0, z=48 back -> world x=48 = run side)
@@ -1661,13 +1675,13 @@ for(const x of [23.25,36.75,47.25,70])box(c,x,x+1.5,BP,TP-1.5,44.5,48,mat.pt);  
 for(const x of [0,92.5])box(c,x,x+3.5,BP,TP-1.5,23.25,24.75,mat.pt);         // end mid studs
 // (no ceiling joists: end walls and the corner posts bolted to the beams tie the top plates; HC above; nothing for hens to roost on up high)
 const PY0=BP,PY1=BP+13;box(c,23.25,38.25,PY1,PY1+1.5,44.5,48,mat.pt);           // pop door header (opening x 24.75..36.75)
-box(c,92.5,96,BP,BP+1.5,3.5,23.25,mat.pt);box(c,92.5,96,22.75,24.25,3.5,23.25,mat.pt); // side hatch framing (roost end)
+// roost end wall: NO side hatch (removed) - plain wall, corner posts + end mid stud only; roost + droppings board are reached through the 2 front clean-out doors
 // NO CEILING: the coop is open to the metal (85% reflective coating); ventilation = the 1/2" HC from the top plates to the roof on all 4 sides (no vent slots cut in the walls - siding is solid to the top plate)
 // SIDING: untreated Plytanium 15/32 plywood (smooth, no grooves), primed + painted all faces and edges
 const ys0=10.2,ys1=13.2;
 skin(c,'x',48.6,-0.6,96.6,SB,()=>TP,[[24.75,36.75,PY0,PY1]],t2);   // back (run side): pop door only, solid to the top plate
 skin(c,'z',-0.6,-0.6,48.6,SB,()=>TP,[[9,23,ys0,ys1],[25,39,ys0,ys1]],t2);           // nest end: egg slots only, solid to the top plate
-skin(c,'z',96.6,-0.6,48.6,SB,()=>TP,[[5,21,8.75,22.75]],t2);                       // roost end: side hatch only, solid to the top plate
+skin(c,'z',96.6,-0.6,48.6,SB,()=>TP,[],t2);                                        // roost end: SOLID to the top plate (no hatch, no openings)
 for(const [x0,x1,z0,z1] of [[-1.35,-0.6,48,48.75],[96.6,97.35,48,48.75]])box(c,x0,x1,SB,TP,z0,z1,mat.trim);
 // FRONT: 2 clean-out doors 47-1/4 x 48 facing OUT onto the slab apron, bottom edge 27" off the slab (wheelbarrow height) (1x4 Z-brace, 3 tee hinges each), hasp + carabiner + spring barrel bolt to the center post
 for(const side of [0,1]){const d=new THREE.Group();d.position.set((side?96:0)*IN,0,-0.6*IN);cg.add(d);const s=side?-1:1;
@@ -1679,21 +1693,14 @@ for(const side of [0,1]){const d=new THREE.Group();d.position.set((side?96:0)*IN
  d.userData={closed:0,open:s*1.6};DOORS.push(d);
  hc([48,side?34.25:23.25,-1.25],[0,0,-1],[-s,0,0],2.4,0.15,d,1.0);}
 box(c,3.5,92.5,FT,FT+5.5,3.5,4.25,mat.pt);   // litter dam (1x6)
-// SIDE HATCH 16x14 (roost end, world z=0 side), cut-out piece = door, strap hinges, hasp + carabiner + spring barrel bolt
-{const h=new THREE.Group();h.position.set(96.6*IN,0,5*IN);cg.add(h);box(h,0,0.6,8.75,22.75,0,16,mat.sid);for(const y of [11,20.5])box(h,0.6,1.35,y-1.75,y+1.75,1,15,mat.pt);
- for(const y of [11.5,20])box(h,0.6,0.8,y-0.4,y+0.4,-3,3,M(0x222222));h.userData={closed:0,open:1.6};DOORS.push(h);
- box(c,96.6,97.35,14,18,21.5,23.5,mat.pt);hc([97.35,16,22.5],[1,0,0],[0,0,-1],2.2,0.6,h,0.8);}
-// ROOST: 2 flat 2x4 bars across the depth (41" each = 13.7"/hen) at the roost end, higher than the nests; slide-out droppings board 24x40
+// ROOST: 2 flat 2x4 bars across the depth (41" each = 13.7"/hen) at the roost end, higher than the nests; droppings board 24x40 slides out toward the FRONT
+// on its 2 ledgers (local z 4 -> 44, runs front-to-back) through the roost-end clean-out door (opening x 48.75..92.5, above the litter dam) - no end-wall hatch needed
 const RY=FT+34,DB=FT+22;
 for(const xc of [76,88])box(c,xc-1.75,xc+1.75,RY-1.5,RY,3.5,44.5,mat.pt);
 box(c,48.75,92.5,RY-5,RY-1.5,3.5,5,mat.pt);box(c,48.75,92.5,RY-5,RY-1.5,43,44.5,mat.pt);   // roost ledgers (front one lifts out)
 box(c,91,92.5,DB-3.5,DB,3.5,44.5,mat.pt);box(c,67,68.5,DB-3.5,DB,3.5,44.5,mat.pt);        // droppings-board ledgers
 for(const z of [3.5,43])box(c,67,68.5,FT,DB-3.5,z,z+1.5,mat.pt);
 box(c,67.25,91.25,DB,DB+0.47,4,44,mat.ply);
-// hanging feeder + 5-gal nipple bucket, both hung by chain from the x=24 purlin (local z=24)
-{const red=M(0xb8432f);cylG(c,4,13,24,FT+9.5,24,red);cylG(c,6,1.2,24,FT+3,24,red);box(c,23.9,24.1,FT+16,rb(24)+BD-R,23.9,24.1,mat.galv);
- cylG(c,6,15,48,FT+20,24,M(0xf2f2ea));for(const a of [0,2.1,4.2])cylG(c,0.35,1.2,48+6.2*Math.cos(a),FT+14.5,24+6.2*Math.sin(a),M(0xd03030),0,Math.PI/2);
- box(c,47.9,48.1,FT+27.5,rb(24)+BD-R,23.9,24.1,mat.galv);}
 // 2 ROLLAWAY NESTS on the nest end wall (sub-group ng uses reachin's back-wall numbers: its z=48 wall = local x=0)
 const ng=new THREE.Group();ng.rotation.y=-Math.PI/2;ng.position.x=48*IN;cg.add(ng);const hn=makeHasp(ng);
 const NZ=44.5,ND=16,NT=Math.tan(11*Math.PI/180),nf=(z)=>FT+8-(z-(NZ-ND))*NT,LW=35,LF=29.75,nl=(z)=>LF+(z-(NZ-ND))*(LW-LF)/ND;
@@ -1734,7 +1741,7 @@ LR('Terry\'s 4 panels 3\'x17\'4" lengthwise, ribs downslope (owned, $0)',96,rm(9
 L1('HIGH end 7\'0" clear',-14,rb(0)+2,-14,0.6);L1('LOW end 6\'0" clear - drips off the slab edge',206,rb(192)-6,48,0.6);
 L1('coop 4x8 raised: floor 30", 3\'9" inside, clean-out doors face OUT',-30,60,48,0.65);
 L1('egg tray + nests (outside, by the gate)',24,46,116,0.6);L1('gate 3\'9" post to post, braced, 3 T-strap hinges',70,88,112,0.6);
-L1('feed: 20 gal galvanized can, lid clips (on the slab)',114,32,128,0.55);L1('side hatch 16x14',14,54,-18,0.55);L1('pop door + fixed cleated ramp (~27 deg)',80,34,70,0.5);
+L1('feed: 20 gal galvanized can, lid clips (on the slab)',114,32,128,0.55);L1('roost end wall solid (no hatch): roost + droppings board via the front doors',14,58,-18,0.5);L1('pop door + fixed cleated ramp (~27 deg)',80,34,70,0.5);L1('feeder (pan 5" off sand) + nipple bucket (14") on chain from the x=120 purlin',126,46,66,0.5);
 L1('2x8 PT kick board, 5" sand full 16\' (~2 cu yd)',120,14,-14,0.6);L1('2 weep notches (low end)',206,4,30,0.55);
 L1('open sand under the coop',26,12,48,0.55);L1('doubled 2x6 floor beams on the 4 corner posts (no mid posts / braces)',-14,20,76,0.5);
 L1('4x4 posts on ABA44Z bases, 1/2" wedge anchors',150,40,-16,0.6);L1('no ceiling: 1/2" HC from the wall tops to the roof, all 4 sides',24,84,-14,0.5);L1('HC over the coop: predator-tight + vented',-16,92,48,0.5);L1('painted Plytanium plywood walls, no vent holes',-10,62,70,0.5);L1('HC closure strips in the panel ribs (no foam)',-14,rm(0)+4,-24,0.5);
@@ -1743,10 +1750,10 @@ dim(g,[-10,S,-4],[-10,S+rb(0),-4],"7'",[0,0,-8]);dim(g,[200,S,-4],[200,S+rb(192)
 dim(g,[-6,S,-10],[-6,S+30,-10],'floor 30"',[0,0,-8]);dim(g,[-6,S+30,-10],[-6,S+75,-10],'3\'9" inside',[0,0,-8]);
 scene.add(g);
 const VIEWS={overview:[[-11,12,22],[8,3,5]],mobile:[[-30,44,16],[9,0.5,4.5]],coop:[[-10,7,9],[2,4.3,4]],inside:[[-1.5,15,4.01],[2,3,4]],coopup:[[-3.5,12.5,0.5],[2.2,5.5,4.4]],coophc:[[-3.2,7.2,-2.6],[2.4,7.1,3.2]],
- nests:[[2.5,5.4,14],[2,3.4,8.4]],roost:[[-6.5,6.5,1.2],[2.5,5,1.6]],run:[[27,9,-7],[10,2.5,4]],gate:[[1,6.5,25],[6.5,3.6,7]],under:[[10.5,2.5,1.0],[2,1.7,5.2]],
+ nests:[[2.5,5.4,14],[2,3.4,8.4]],roost:[[-6.5,6.5,1.2],[2.5,5,1.6]],run:[[27,9,-7],[10,2.5,4]],feed:[[15.3,4.2,7.5],[9.4,3.7,4.9]],feedtop:[[13.2,4.4,5.5],[10,6.4,5.5]],roostend:[[-6.5,6.2,-8.5],[2.6,3.6,2.4]],gate:[[1,6.5,25],[6.5,3.6,7]],under:[[10.5,2.5,1.0],[2,1.7,5.2]],
  roofdetail:[[18.6,6.0,-3.0],[14.5,6.5,0.2]],top:[[8,44,4.01],[8,0,4]],noroof:[[8,22,17],[8,0,4]],noroofm:[[-6,31,4],[8.5,0,4]]};
 const CLIP={inside:[new THREE.Plane(new THREE.Vector3(0,-1,0),(S+R+46)*IN)]};
-glue({g,VIEWS,CLIP,TLID,FLID,DOORS,AP:[],personAt:[-46,128],personY:S,hideP6:['coophc','coop','nests','roost','inside','under','coopup'],
+glue({g,VIEWS,CLIP,TLID,FLID,DOORS,AP:[],personAt:[-46,128],personY:S,hideP6:['roostend','feed','feedtop','coophc','coop','nests','roost','inside','under','coopup'],
  title:'Terry\'s SLAB 8x16 — reach-in 4x8 coop raised 30" over a full 8x16 sand run, one shed roof of his 4 panels (high end 7\', low end 6\')'});
 {const sv=window.setView,isOn=(id)=>/OPEN/.test((document.getElementById(id)||{}).textContent||'');const q0=new URLSearchParams(location.search);
  const auto=v=>{if(v==='roost'&&!isOn('dbtn'))toggleDoors();if(v==='nests'&&!isOn('tbtn'))toggleTray();};
