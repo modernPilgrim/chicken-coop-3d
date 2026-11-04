@@ -1537,8 +1537,8 @@ function sbox(par,x0,x1,dy0,dy1,z0,z1,m,f=rb){ // box following the roof slope: 
  const L=(x1-x0)/Math.cos(SL),xc=(x0+x1)/2,b=box(par,-L/2,L/2,dy0,dy1,z0,z1,m);b.position.set(xc*IN,(f(xc)+(dy0+dy1)/2)*IN,(z0+z1)/2*IN);b.rotation.z=-SL;return b;}
 // ---------- POSTS: 10 PT 4x4 on Simpson ABA44Z bases (1" standoff), 1/2" x 4-1/4" wedge anchors; bays ~4' ----------
 const PX=[0,44.5,94.25,142.25,188.5],PZ=[0,92.5];
-// FLAT post tops: beams bolted on at slope first, then each post cut flat 1/4" below the beam top at its low side -> purlins bear on the beams only
-for(const x0 of PX)for(const z0 of PZ){const xc=x0+1.75;box(E,x0,x0+3.5,1,rb(x0+3.5)+BD-0.25,z0,z0+3.5,PTc);
+// FLAT post tops: each post measured off the beam line and cut square on the ground (miter saw) before setting, top ~1/2" below the beam top at its low side -> purlins bear on the beams only
+for(const x0 of PX)for(const z0 of PZ){const xc=x0+1.75;box(E,x0,x0+3.5,1,rb(x0+3.5)+BD-0.5,z0,z0+3.5,PTc);
  box(E,x0-0.4,x0+3.9,0,0.12,z0-0.4,z0+3.9,mat.galv);box(E,x0-0.1,x0+3.6,0.12,1.6,z0-0.1,z0+0.05,mat.galv);box(E,x0-0.1,x0+3.6,0.12,1.6,z0+3.45,z0+3.6,mat.galv);
  cylG(E,0.45,0.9,xc,0.55,z0+1.75,mat.galv);}
 // ---------- COOP SUPPORT: coop floor 30" over the sand. Doubled PT 2x6 floor beams (8' each, across the width) sandwich the 4 run posts at the coop end
