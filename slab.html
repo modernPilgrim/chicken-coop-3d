@@ -1595,7 +1595,7 @@ meshPanel(E,[188.4,0,2],[0,0,92],[0,RY1,0],3);meshPanel(E,[188.4,HY0,2],[0,0,92]
 for(const [a,b] of [[48,94.25],[97.75,142.25],[145.75,188.5]]){box(E,a,b,RY0,RY1,2,3.5,mat.pt);box(E,a,b,BT0,BT1,3.65,4.275,mat.pt);}        // z=0 side: 3 rails + battens
 for(const [a,b] of [[97.75,142.25],[145.75,188.5]]){box(E,a,b,RY0,RY1,92.5,94,mat.pt);box(E,a,b,BT0,BT1,91.725,92.35,mat.pt);}             // z=96 side: 2 rails + battens (gate bay: the gate mid rail)
 for(const [a,b] of [[3.5,47.25],[48.75,92.5]]){box(E,188.5,190,RY0,RY1,a,b,mat.pt);box(E,187.725,188.35,BT0,BT1,a,b,mat.pt);}              // low end: 2 rails + battens (either side of the end mid stud)
-// coop end: HC below the coop (slab -> floor framing) on 3 sides; the coop's walls are the enclosure from 27" to 75", and 1/2" HC closes 75" -> beams/purlins on all 4 sides (no ceiling, no T1-11 fill: open to the metal, fully ventilated)
+// coop end: HC below the coop (slab -> floor framing) on 3 sides; the coop's walls are the enclosure from 29-1/4" to 75", and 1/2" HC closes 75" -> beams/purlins on all 4 sides (no ceiling, no T1-11 fill: open to the metal, fully ventilated)
 meshPanel(E,[3.6,0,2],[0,0,92],[0,FB0,0],3);meshPanel(E,[3.6,FB0-0.05,3.5],[0,0,89],[1.4,0,0],3); // front: 92 wide (1-1/2 onto each post face) + 1-1/2 fold under the inner floor-beam ply                                               // front, below the floor beam
 for(const z of [3.6,92.4]){meshPanel(E,[6.5,0,z],[35,0,0],[0,FJ0+2,0],3);for(const x of [3.5,41.5])meshPanel(E,[x,0,z],[3,0,0],[0,FJ0-3.5,0],3);for(const x of [2,44.5])meshPanel(E,[x,0,z],[1.5,0,0],[0,FJ0+2,0],3);} // 44 wide (1-1/2 onto each post), top corners notched 3 x 5-1/2 around the ply + ledger // both long sides, below the coop end walls (top laps 2" up the end joist face, stapled); 38 wide, top corners notched 1-1/2 x 5-1/2 around the ledgers
 {const HS=1.5,WM=M(0xd8dde0,{metalness:0.8,roughness:0.25}); // top HC: finer grid lines so it reads as a separate panel; fender washers drawn
@@ -1665,7 +1665,7 @@ const FLID=new THREE.Group();FLID.userData={closed:0,open:0};
 // local x 0..96 = 8' length (x=0 NEST end -> world z=96, x=96 ROOST end -> world z=0); local z 0..48 (z=0 FRONT doors -> world x=0, z=48 back -> world x=48 = run side)
 const cg=new THREE.Group();cg.rotation.y=Math.PI/2;cg.position.set(0,R*IN,96*IN);E.add(cg);const c=cg; // whole coop raised R=24.25": floor top 30" above the slab
 const hc=makeHasp(cg);const t2=mat.sid.clone();t2.side=THREE.DoubleSide;
-const FT=5.75,BP=FT+1.5,TP=50.75,SB=2.75; // local: floor top 5.75 (30" world), top plate 50.75 -> 45" floor-to-ceiling; siding from 2.75
+const FT=5.75,BP=FT+1.5,TP=50.75,SB=5; // local: floor top 5.75 (30" world), top plate 50.75 -> 45" floor-to-ceiling; siding + doors from 5 (29-1/4" world = on top of the outer floor-beam plies) -> 45-3/4 tall
 // FLOOR: ladder frame - 7 joists (38") between the 2 INNER floor-beam plies (local z 5 / 43), sitting on the 2x4 ledgers, 2 #10 x 3 toe-screws per end into the ply (no hangers);
 // end joists at local x 2..3.5 / 92.5..94 (under the end-wall plates); 2x4 FLAT edge fillers in the 3.5" ply gaps (local z 0..3.5 / 44.5..48), tops flush -> carry the sheet edges + front/back plates
 {const J=[2,16,32,48,64,80,92.5];for(const x of J)box(c,x,x+1.5,1.5,5,5,43,mat.pt);
@@ -1694,7 +1694,7 @@ skin(c,'z',96.6,-0.6,48.0,SB,()=>TP,[],t2);                                     
 grooves(c,'z',96.66,[8,16,24,32,40],SB,()=>TP,[]);
 for(const [x0,x1,z0,z1] of [[-1.35,-0.6,47.5,48.75],[96.6,97.35,47.5,48.75]])box(c,x0,x1,SB,TP,z0,z1,mat.trim);   // back corner trim: 1x4 ripped 1-1/4, covers the end-sheet edge + the back sheet's end
 for(const [x0,x1] of [[-1.35,-0.6],[96.6,97.35]])box(c,x0,x1,SB+0.125,TP-0.125,-0.6,2.9,mat.trim);   // FRONT corners: PT 1x4 hinge backing on the end-wall face, front edge flush with the door face (tee-hinge T-leaf screws into it); door swings away from it
-// FRONT: 2 clean-out doors 47-1/4 x 48 facing OUT onto the slab apron, bottom edge 27" off the slab (wheelbarrow height) (1x4 Z-brace, 2 tee hinges each), padlockable spring barrel bolt to the center post + carabiner through its padlock hole (no hasp)
+// FRONT: 2 clean-out doors 47-1/8 x 45-3/4 facing OUT onto the slab apron, bottom edge 29-1/4" off the slab (sits over the floor-beam ply) (wheelbarrow height) (1x4 Z-brace, 2 tee hinges each), padlockable spring barrel bolt to the center post + carabiner through its padlock hole (no hasp)
 for(const side of [0,1]){const d=new THREE.Group();d.position.set((side?96:0)*IN,0,-0.6*IN);cg.add(d);const s=side?-1:1;
  const xa=(v)=>s*v;const bx=(a,b,y0,y1,z0,z1,m)=>box(d,Math.min(xa(a),xa(b)),Math.max(xa(a),xa(b)),y0,y1,z0,z1,m);
  bx(0.125,47.25,SB,TP,-0.6,0,mat.sid);for(const gx of [8,16,24,32,40])bx(gx-0.1875,gx+0.1875,SB,TP,-0.66,-0.6,GRV);   // T1-11 door skin: grooves 8 in. OC from the hinge edge, 7-1/4 in. groove-free at the latch edge
