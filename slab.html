@@ -1439,7 +1439,7 @@ const ground=new THREE.Mesh(new THREE.PlaneGeometry(300,300),new THREE.MeshLambe
 ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
 const grid=new THREE.GridHelper(40,40,0x557a38,0x5f8a40);grid.position.set(6,0.005,4);scene.add(grid);
 const M=(c,o={})=>new THREE.MeshStandardMaterial(Object.assign({color:c,roughness:0.8,metalness:0},o));
-const mat={wood:M(0xc89a5c),pt:M(0xa8875a),skid:M(0x8a6a3e),sid:M(0xcbbf9f)/* painted Plytanium plywood siding */,trim:M(0xe8dcc4),
+const mat={wood:M(0xc89a5c),pt:M(0xa8875a),skid:M(0x8a6a3e),sid:M(0xcbbf9f)/* painted T1-11 siding (LP SmartSide) */,trim:M(0xe8dcc4),
  metal:M(0xbfc5c9,{metalness:0.7,roughness:0.35,side:THREE.DoubleSide}),galv:M(0x9aa2a8,{metalness:0.8,roughness:0.3}),
  tire:M(0x1b1b1b),hub:M(0x888888,{metalness:0.6}),solar:M(0x1a2a55,{metalness:0.3,roughness:0.2}),
  mesh:new THREE.MeshStandardMaterial({color:0x111111,metalness:0.05,roughness:0.95,transparent:true,opacity:0.30,side:THREE.DoubleSide,depthWrite:false}), /* 1/2" HC rolled flat black (Valspar DTM acrylic) - matte, still see-through */
@@ -1537,14 +1537,16 @@ function sbox(par,x0,x1,dy0,dy1,z0,z1,m,f=rb){ // box following the roof slope: 
  const L=(x1-x0)/Math.cos(SL),xc=(x0+x1)/2,b=box(par,-L/2,L/2,dy0,dy1,z0,z1,m);b.position.set(xc*IN,(f(xc)+(dy0+dy1)/2)*IN,(z0+z1)/2*IN);b.rotation.z=-SL;return b;}
 // ---------- POSTS: 10 PT 4x4 on Simpson ABA44Z bases (1" standoff), 1/2" x 4-1/4" wedge anchors; bays ~4' ----------
 const PX=[0,44.5,94.25,142.25,188.5],PZ=[0,92.5];
-for(const x0 of PX)for(const z0 of PZ){const xc=x0+1.75;box(E,x0,x0+3.5,1,rb(xc)+BD,z0,z0+3.5,PTc);
+// FLAT post tops: beams bolted on at slope first, then each post cut flat 1/4" below the beam top at its low side -> purlins bear on the beams only
+for(const x0 of PX)for(const z0 of PZ){const xc=x0+1.75;box(E,x0,x0+3.5,1,rb(x0+3.5)+BD-0.25,z0,z0+3.5,PTc);
  box(E,x0-0.4,x0+3.9,0,0.12,z0-0.4,z0+3.9,mat.galv);box(E,x0-0.1,x0+3.6,0.12,1.6,z0-0.1,z0+0.05,mat.galv);box(E,x0-0.1,x0+3.6,0.12,1.6,z0+3.45,z0+3.6,mat.galv);
  cylG(E,0.45,0.9,xc,0.55,z0+1.75,mat.galv);}
 // ---------- COOP SUPPORT: coop floor 30" over the sand. Doubled PT 2x6 floor beams (8' each, across the width) sandwich the 4 run posts at the coop end
-// on the 4 full-height corner posts only (no mid posts, no knee braces under the coop): 89" clear span, 1/2" x 8" carriage bolts (2 per post per beam) ----------
-const R=24.25,FB0=R-4,FB1=R+1.5,CT=R+50.75; // coop group raise; floor beams y 20.25..25.75 (top = coop joist bottoms); coop top plates 75 - no ceiling: 1/2" HC closes 75" -> beams/purlins on all 4 sides
+// on the 4 full-height corner posts only (no mid posts, no knee braces under the coop): 89" clear span, 1/2" x 8" carriage bolts (2 per post per beam); ladder-frame floor ----------
+const R=24.25,FB0=R-0.5,FB1=R+5,FJ0=R+1.5,CT=R+50.75; // coop group raise; floor beams y 23.75..29.25 (top flush with the joist tops = floor framing top; 7 joists hung between the INNER plies on LUS24Z hangers, bottoms at 25.75); coop top plates 75 - no ceiling: 1/2" HC closes 75" -> beams/purlins on all 4 sides
 for(const xa of [-1.5,3.5,43,48])box(E,xa,xa+1.5,FB0,FB1,0,96,mat.pt);
-for(const xc of [1.75,46.25])for(const zc of [1.75,94.25])for(const dy of [1.5,4])cylG(E,0.5,8,xc,FB0+dy,zc,mat.galv,0,Math.PI/2);
+// floor-beam carriage bolts: 2 per post SIDE BY SIDE 1" above the beam bottom (2" apart, 3/4" from the post faces) - nuts stay below the end joist + its LUS24Z hanger
+for(const xc of [1.75,46.25])for(const zc of [0.75,2.75,93.25,95.25])cylG(E,0.5,8,xc,FB0+1,zc,mat.galv,0,Math.PI/2);
 // ---------- BEAMS: doubled 2x6 sandwiching the posts, 1/2" x 8" carriage bolts (2 per post); splices land on posts ----------
 for(const [zo,zi] of [[-1.5,3.5],[96,91]]){
  // outer layer: 8'+8' (joint at x=96 on the middle post); inner layer: 12'+4' (joint at x=144)
@@ -1581,7 +1583,7 @@ box(E,45.25,48.75,CT,rb(48)+BD,47.25,48.75,mat.pt);                  // back HC 
 for(const z0 of [0,92.5])box(E,48,48.75,CT,rb(48),z0,z0+3.5,mat.pt); // 1x4 furring on the 2 back posts (top plate -> beam) so the HC lies flat
 // ---------- KICK BOARD: PT 2x8 inside the posts, clamps the HC; 5" of sand; 2 weep notches in the LOW end ----------
 const SAND=M(0xd9c79a,{roughness:1});
-box(E,3.6,187,0,7.25,3.6,5.1,mat.pt);box(E,3.6,187,0,7.25,90.9,92.4,mat.pt);   // long sides, full length (2x8x16)
+for(const [a,b] of [[3.6,95.97],[96.03,187]]){box(E,a,b,0,7.25,3.6,5.1,mat.pt);box(E,a,b,0,7.25,90.9,92.4,mat.pt);}   // long sides: 2 x 2x8x8 per side, butt joint centered on post C (x=96, backed by the post)
 box(E,187,188.4,0.75,7.25,3.6,92.4,mat.pt);for(const [a,b] of [[3.6,29],[31,65],[67,92.4]])box(E,187,188.4,0,0.75,a,b,mat.pt);
 box(E,3.6,5.1,0,7.25,5.1,90.9,mat.pt); // high end, inside the coop-end posts (under the coop)
 box(E,5.1,187,0,5,5.1,90.9,SAND);    // full-length sand, open under the coop
@@ -1598,7 +1600,7 @@ for(const [a,b] of [[97.75,142.25],[145.75,188.5]]){box(E,a,b,RY0,RY1,92.5,94,ma
 for(const [a,b] of [[3.5,47.25],[48.75,92.5]]){box(E,188.5,190,RY0,RY1,a,b,mat.pt);box(E,187.725,188.35,BT0,BT1,a,b,mat.pt);}              // low end: 2 rails + battens (either side of the end mid stud)
 // coop end: HC below the coop (slab -> floor framing) on 3 sides; the coop's walls are the enclosure from 27" to 75", and 1/2" HC closes 75" -> beams/purlins on all 4 sides (no ceiling, no T1-11 fill: open to the metal, fully ventilated)
 meshPanel(E,[3.6,0,3.5],[0,0,89],[0,FB0,0],3);                                               // front, below the floor beam
-for(const z of [3.6,92.4])meshPanel(E,[5,0,z],[38,0,0],[0,FB1,0],3);                          // both long sides, below the coop end walls
+for(const z of [3.6,92.4])meshPanel(E,[5,0,z],[38,0,0],[0,FJ0+2,0],3);                        // both long sides, below the coop end walls (top laps 2" up the end joist face, stapled)
 {const HS=1.5,WM=M(0xd8dde0,{metalness:0.8,roughness:0.25}); // top HC: finer grid lines so it reads as a separate panel; fender washers drawn
  const wsh=(x,y,z,ax)=>cylG(E,0.5,0.14,x,y,z,WM,ax==='z'?Math.PI/2:0,ax==='x'?Math.PI/2:0);
  // FRONT (x=0 face, over the clean-out doors): 96 x 17-1/2: 1-1/2" fold onto the top of the front top plate, 14-1/2" up the posts + front nailer, 1-1/2" lap on the x=0 purlin face
@@ -1670,10 +1672,12 @@ let FLID;{const cx=112,cz=107.5,GV=M(0xb9c0c4,{metalness:0.55,roughness:0.4});cy
 const cg=new THREE.Group();cg.rotation.y=Math.PI/2;cg.position.set(0,R*IN,96*IN);E.add(cg);const c=cg; // whole coop raised R=24.25": floor top 30" above the slab
 const hc=makeHasp(cg);const t2=mat.sid.clone();t2.side=THREE.DoubleSide;
 const FT=5.75,BP=FT+1.5,TP=50.75,SB=2.75; // local: floor top 5.75 (30" world), top plate 50.75 -> 45" floor-to-ceiling; siding from 2.75
-// FLOOR: rims + 7 joists sitting on the 2 doubled 2x6 floor beams (inner layers at local z 3.5..5 and 43..44.5), solid blocking over the beams, 1 sheet PT ply
-for(const z of [0,46.5])box(c,3.5,92.5,1.5,5,z,z+1.5,mat.pt);
-{const J=[3.5,16,32,48,64,80,91];for(const x of J)box(c,x,x+1.5,1.5,5,1.5,46.5,mat.pt);
- for(let i=0;i<J.length-1;i++)for(const z of [3.5,43])box(c,J[i]+1.5,J[i+1],1.5,5,z,z+1.5,mat.pt);}
+// FLOOR: ladder frame - 7 joists (38") hung between the 2 INNER floor-beam plies (local z 5 / 43) on Simpson LUS24Z hangers (10d x 3 HDG);
+// end joists at local x 2..3.5 / 92.5..94 (under the end-wall plates); 2x4 FLAT edge fillers in the 3.5" ply gaps (local z 0..3.5 / 44.5..48), tops flush -> carry the sheet edges + front/back plates
+{const J=[2,16,32,48,64,80,92.5];for(const x of J){box(c,x,x+1.5,1.5,5,5,43,mat.pt);
+  for(const [zf,d] of [[5,1],[43,-1]]){const z0=Math.min(zf,zf+d*0.06),z1=Math.max(zf,zf+d*0.06),za=Math.min(zf,zf+d*1.9),zb=Math.max(zf,zf+d*1.9);
+   box(c,x-1.05,x+2.55,1.55,4.65,z0,z1,mat.galv);box(c,x-0.06,x+1.56,1.44,1.5,za,zb,mat.galv);box(c,x-0.06,x,1.5,4.65,za,zb,mat.galv);box(c,x+1.5,x+1.56,1.5,4.65,za,zb,mat.galv);}}
+ for(const z of [0,44.5])box(c,3.5,92.5,3.5,5,z,z+3.5,mat.pt);}
 box(c,3.5,92.5,5,FT,0,48,mat.ply);box(c,0,3.5,5,FT,3.5,44.5,mat.ply);box(c,92.5,96,5,FT,3.5,44.5,mat.ply);
 // WALL FRAMING (4x4 corner posts are the run posts)
 box(c,3.5,92.5,FT,BP,0,3.5,mat.pt);box(c,3.5,92.5,FT,BP,44.5,48,mat.pt);for(const x of [0,92.5])box(c,x,x+3.5,FT,BP,3.5,44.5,mat.pt);
@@ -1757,7 +1761,7 @@ L1('coop 4x8 raised: floor 30", 3\'9" inside, clean-out doors face OUT',-30,60,4
 L1('egg tray + nests (outside, by the gate)',24,46,116,0.6);L1('gate 3\'9" post to post, braced, 3 T-strap hinges',70,88,112,0.6);
 L1('feed: 20 gal galvanized can, lid clips (on the slab)',114,32,128,0.55);L1('roost end wall solid (no hatch): roost + droppings board via the front doors',14,58,-18,0.5);L1('pop door + fixed cleated ramp (~27 deg)',80,34,70,0.5);L1('feeder (pan 5" off sand) + nipple bucket (14") on chain from the x=120 purlin',126,46,66,0.5);
 L1('2x8 PT kick board, 5" sand full 16\' (~2 cu yd)',120,14,-14,0.6);L1('2 weep notches (low end)',206,4,30,0.55);
-L1('open sand under the coop',26,12,48,0.55);L1('doubled 2x6 floor beams on the 4 corner posts (no mid posts / braces)',-14,20,76,0.5);
+L1('open sand under the coop',26,12,48,0.55);L1('doubled 2x6 floor beams on the 4 corner posts, joists hung between them (LUS24Z)',-14,22,76,0.5);
 L1('4x4 posts on ABA44Z bases, 1/2" wedge anchors',150,40,-16,0.6);L1('no ceiling: 1/2" HC (painted black) from the wall tops to the roof, all 4 sides',24,84,-14,0.5);L1('2x4 seam rail at 36": black HC 36" below / 48" above, 1x2 batten over the lap',100,30,-14,0.55);L1('HC over the coop: predator-tight + vented',-16,92,48,0.5);L1('painted T1-11 siding (LP SmartSide 8" OC), no vent holes',-10,62,70,0.5);L1('HC closure strips in the panel ribs (no foam)',-14,rm(0)+4,-24,0.5);
 dim(g,[0,S,-26],[192,S,-26],"16'",[0,5,0]);dim(g,[204,S,0],[204,S,96],"8'",[0,5,0]);
 dim(g,[-10,S,-4],[-10,S+rb(0),-4],"7'",[0,0,-8]);dim(g,[200,S,-4],[200,S+rb(192),-4],"6'",[0,0,8]);
